@@ -1,0 +1,55 @@
+package SVBK.service;
+
+import SVBK.model.Student;
+import SVBK.model.Course;
+import SVBK.model.CreditBasedStudent;
+import SVBK.model.PartTimeStudent;
+
+/**
+ * Lớp GradingSystem chịu trách nhiệm nhập điểm và tính CPA cho sinh viên.
+ */
+public class GradingSystem {
+    /**
+     * Nhập điểm cho một học phần của sinh viên.
+     * - Sinh viên tín chỉ: điểm nhập phải nằm trong [0.0, 4.0]
+     * - Sinh viên niên chế: điểm nhập phải nằm trong [0.0, 10.0]
+     *
+     * @param student    Đối tượng Student
+     * @param course     Đối tượng Course
+     * @param midterm    Điểm giữa kỳ
+     * @param finalScore Điểm cuối kỳ
+     * @return true nếu nhập điểm hợp lệ và thành công; false nếu dữ liệu sai
+     */
+    public boolean enterGrade(Student student, Course course, double midterm, double finalScore) {
+        if (student == null || course == null) {
+            return false;
+        }
+        if (student instanceof CreditBasedStudent) {
+            // Thang điểm 4
+            if (midterm < 0.0 || midterm > 4.0 || finalScore < 0.0 || finalScore > 4.0) {
+                return false;
+            }
+        } else if (student instanceof PartTimeStudent) {
+            // Thang điểm 10
+            if (midterm < 0.0 || midterm > 10.0 || finalScore < 0.0 || finalScore > 10.0) {
+                return false;
+            }
+        }
+        course.setMidtermScore(midterm);
+        course.setFinalScore(finalScore);
+        return true;
+    }
+
+    /**
+     * Tính CPA bằng cách gọi calculateFinalGrade() trên Student.
+     *
+     * @param student Đối tượng Student
+     * @return giá trị CPA; 0.0 nếu student null
+     */
+    public double calculateCPA(Student student) {
+        if (student == null) {
+            return 0.0;
+        }
+        return student.calculateFinalGrade();
+    }
+}

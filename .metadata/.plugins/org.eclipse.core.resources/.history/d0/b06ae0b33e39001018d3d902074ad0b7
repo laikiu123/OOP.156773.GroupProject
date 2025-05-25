@@ -1,0 +1,92 @@
+// File: SVBK/model/CreditBasedStudent.java
+package SVBK.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Sinh viên hệ tín chỉ, tham chiếu Program để kiểm tra tốt nghiệp.
+ */
+public class CreditBasedStudent extends Student {
+    /** Danh sách học phần đã đăng ký. */
+    private List<Course> registeredCourses;
+    /** Số tín chỉ đã hoàn thành. */
+    private int completedCredits;
+    /** Chương trình đào tạo kèm điều kiện tín chỉ. */
+    private Program program;
+
+    /**
+     * Constructor đầy đủ sinh viên và chương trình.
+     */
+    public CreditBasedStudent(String studentID,
+                               String studentName,
+                               Program program) {
+        super(studentID, studentName, "Credit-based");
+        this.program = program;
+        this.registeredCourses = new ArrayList<>();
+        this.completedCredits = 0;
+    }
+
+    // ===== Getter / Setter =====
+    public List<Course> getRegisteredCourses() { return registeredCourses; }
+    public void setRegisteredCourses(List<Course> registeredCourses) { this.registeredCourses = registeredCourses; }
+    public int getCompletedCredits() { return completedCredits; }
+    public void setCompletedCredits(int completedCredits) { this.completedCredits = completedCredits; }
+    public Program getProgram() { return program; }
+    public void setProgram(Program program) { this.program = program; }
+
+    /**
+     * Kiểm tra điều kiện tiên quyết của một học phần.
+     */
+    public boolean checkPrerequisites(Course course) {
+        if (course == null) return false;
+        String preID = course.getPreCourseID();
+        if (preID == null || preID.trim().isEmpty()) {
+            return true;
+        }
+        return getCompletedCourseIDs().contains(preID);
+    }
+
+    /**
+     * Đăng ký khóa học nếu đủ prerequisite và chưa đăng ký.
+     */
+    public boolean registerCourse(Course course) {
+        if (course == null || !checkPrerequisites(course)) return false;
+        for (Course c : registeredCourses) {
+            if (c.getCourseID().equals(course.getCourseID())) return false;
+        }
+        registeredCourses.add(course);
+        return true;
+    }
+
+    /**
+     * Ghi nhận hoàn thành khóa học: remove, addCompleted, cộng tín chỉ.
+     */
+    public void completeCourse(Course course) {
+        if (course != null && registeredCourses.remove(course)) {
+            addCompletedCourseID(course.getCourseID());
+            completedCredits += course.getCreditCount();
+        }
+    }
+
+    @Override
+    public double calculateFinalGrade() {
+        double totalPoints = 0;
+        int totalCredits = 0;
+        for (Course c : registeredCourses) {
+            totalPoints += c.calculateFinalGrade() * c.getCreditCount();
+            totalCredits += c.getCreditCount();
+        }
+        return totalCredits == 0 ? 0.0 : totalPoints / totalCredits;
+    }
+
+    /**
+     * Kiểm tra tốt nghiệp theo Program:
+     */
+    @Override
+    public boolean checkGraduation() {
+        if (!program.hasCompletedAllRequired(this)) return false;
+        if (program.countCompletedElectiveCredits(this) < program.getElectiveCreditRequirement()) return false;
+        return completedCredits >= program.getTotalCreditRequirement();
+    }
+}

@@ -1,0 +1,45 @@
+// File: SVBK/service/GradingSystem.java
+package SVBK.service;
+
+import SVBK.model.Student;
+import SVBK.model.Course;
+
+/**
+ * Lớp GradingSystem chịu trách nhiệm nhập điểm và tính điểm trung bình (CPA) cho sinh viên.
+ * Đây là service dùng chung cho cả CreditBasedStudent và PartTimeStudent.
+ */
+public class GradingSystem {
+    /**
+     * Nhập điểm cho một học phần của sinh viên.
+     *
+     * @param student    Đối tượng Student (có thể là CreditBasedStudent hoặc PartTimeStudent)
+     * @param course     Đối tượng Course cần nhập điểm
+     * @param midterm    Điểm giữa kỳ (midterm)
+     * @param finalScore Điểm cuối kỳ (final)
+     * @return true nếu nhập điểm thành công; false nếu input không hợp lệ
+     */
+    public boolean enterGrade(Student student, Course course, double midterm, double finalScore) {
+        if (student == null || course == null) {
+            return false;
+        }
+        // Gán điểm giữa kỳ và cuối kỳ vào đối tượng Course
+        course.setMidtermScore(midterm);
+        course.setFinalScore(finalScore);
+        return true;
+    }
+
+    /**
+     * Tính chỉ số điểm trung bình (CPA) của sinh viên.
+     * Sử dụng phương thức calculateFinalGrade() đã được cài đặt riêng ở mỗi loại Student.
+     *
+     * @param student Đối tượng Student cần tính CPA
+     * @return giá trị CPA (0.0 nếu student null)
+     */
+    public double calculateCPA(Student student) {
+        if (student == null) {
+            return 0.0;
+        }
+        // Delegation: logic tính điểm do lớp Student và các lớp con xử lý
+        return student.calculateFinalGrade();
+    }
+}

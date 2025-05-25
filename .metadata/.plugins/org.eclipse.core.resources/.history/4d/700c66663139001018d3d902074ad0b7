@@ -1,0 +1,105 @@
+// File: SVBK/manager/CourseManager.java
+package SVBK.manager;
+
+import SVBK.model.Course;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Lớp CourseManager chịu trách nhiệm quản lý danh sách học phần:
+ * thêm, xóa, tìm kiếm, sửa và truy xuất các Course.
+ */
+public class CourseManager {
+    /**
+     * Danh sách học phần được quản lý.
+     */
+    private List<Course> listCourses;
+
+    /**
+     * Constructor khởi tạo danh sách học phần rỗng.
+     */
+    public CourseManager() {
+        this.listCourses = new ArrayList<>();
+    }
+
+    /**
+     * Thêm một học phần mới vào danh sách.
+     *
+     * @param course Đối tượng Course cần thêm
+     * @return true nếu thêm thành công;
+     *         false nếu course null hoặc đã tồn tại (trùng courseID).
+     */
+    public boolean addCourse(Course course) {
+        if (course == null || findCourse(course.getCourseID()) != null) {
+            return false;
+        }
+        listCourses.add(course);
+        return true;
+    }
+
+    /**
+     * Xóa học phần khỏi danh sách dựa trên mã học phần.
+     *
+     * @param courseID Mã học phần cần xóa
+     * @return true nếu xóa thành công;
+     *         false nếu không tìm thấy courseID.
+     */
+    public boolean removeCourse(String courseID) {
+        Course c = findCourse(courseID);
+        if (c == null) {
+            return false;
+        }
+        listCourses.remove(c);
+        return true;
+    }
+
+    /**
+     * Tìm học phần theo mã học phần.
+     *
+     * @param courseID Mã học phần cần tìm
+     * @return đối tượng Course nếu tìm thấy;
+     *         null nếu courseID null hoặc không tồn tại.
+     */
+    public Course findCourse(String courseID) {
+        if (courseID == null || courseID.trim().isEmpty()) {
+            return null;
+        }
+        for (Course c : listCourses) {
+            if (courseID.equals(c.getCourseID())) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sửa thông tin học phần đã tồn tại.
+     *
+     * @param courseID  Mã học phần cần sửa
+     * @param newCourse Đối tượng Course chứa thông tin mới;
+     *                  courseID phải khớp với mã cũ.
+     * @return true nếu sửa thành công;
+     *         false nếu newCourse null, mã không khớp hoặc không tìm thấy.
+     */
+    public boolean editCourse(String courseID, Course newCourse) {
+        if (newCourse == null || courseID == null || !courseID.equals(newCourse.getCourseID())) {
+            return false;
+        }
+        for (int i = 0; i < listCourses.size(); i++) {
+            if (courseID.equals(listCourses.get(i).getCourseID())) {
+                listCourses.set(i, newCourse);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Lấy danh sách tất cả học phần.
+     *
+     * @return bản sao List<Course> để tránh chỉnh sửa trực tiếp danh sách nội bộ.
+     */
+    public List<Course> getAllCourses() {
+        return new ArrayList<>(listCourses);
+    }
+}

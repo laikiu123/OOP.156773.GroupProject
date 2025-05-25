@@ -1,0 +1,77 @@
+// File: SVBK/model/Program.java
+package SVBK.model;
+
+import java.util.List;
+
+/**
+ * Đại diện cho chương trình đào tạo của một ngành học.
+ * Chứa danh sách học phần bắt buộc, học phần tự chọn và ngưỡng tín chỉ.
+ */
+public class Program {
+    /** Tên ngành. */
+    private String majorName;
+
+    /** Học phần bắt buộc phải hoàn thành. */
+    private List<Course> requiredCourses;
+
+    /** Học phần tự chọn sinh viên có thể lựa chọn. */
+    private List<Course> electiveCourses;
+
+    /** Số tín chỉ tối thiểu từ electiveCourses phải tích lũy. */
+    private int electiveCreditRequirement;
+
+    /** Tổng số tín chỉ (bắt buộc + tự chọn) cần tích lũy. */
+    private int totalCreditRequirement;
+
+    /**
+     * Constructor đầy đủ.
+     */
+    public Program(String majorName,
+                   List<Course> requiredCourses,
+                   List<Course> electiveCourses,
+                   int electiveCreditRequirement,
+                   int totalCreditRequirement) {
+        this.majorName = majorName;
+        this.requiredCourses = requiredCourses;
+        this.electiveCourses = electiveCourses;
+        this.electiveCreditRequirement = electiveCreditRequirement;
+        this.totalCreditRequirement = totalCreditRequirement;
+    }
+
+    // ===== Getter / Setter =====
+    public String getMajorName() { return majorName; }
+    public void setMajorName(String majorName) { this.majorName = majorName; }
+
+    public List<Course> getRequiredCourses() { return requiredCourses; }
+    public void setRequiredCourses(List<Course> requiredCourses) { this.requiredCourses = requiredCourses; }
+
+    public List<Course> getElectiveCourses() { return electiveCourses; }
+    public void setElectiveCourses(List<Course> electiveCourses) { this.electiveCourses = electiveCourses; }
+
+    public int getElectiveCreditRequirement() { return electiveCreditRequirement; }
+    public void setElectiveCreditRequirement(int electiveCreditRequirement) { this.electiveCreditRequirement = electiveCreditRequirement; }
+
+    public int getTotalCreditRequirement() { return totalCreditRequirement; }
+    public void setTotalCreditRequirement(int totalCreditRequirement) { this.totalCreditRequirement = totalCreditRequirement; }
+
+    /** Kiểm tra hoàn thành tất cả requiredCourses. */
+    public boolean hasCompletedAllRequired(CreditBasedStudent student) {
+        for (Course c : requiredCourses) {
+            if (!student.getCompletedCourseIDs().contains(c.getCourseID())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Tính tổng tín chỉ đã hoàn thành trong electiveCourses. */
+    public int countCompletedElectiveCredits(CreditBasedStudent student) {
+        int sum = 0;
+        for (Course c : electiveCourses) {
+            if (student.getCompletedCourseIDs().contains(c.getCourseID())) {
+                sum += c.getCreditCount();
+            }
+        }
+        return sum;
+    }
+}

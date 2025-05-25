@@ -1,0 +1,159 @@
+// File: SVBK/model/Student.java
+package SVBK.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Lớp abstract đại diện cho sinh viên chung (Credit-based hoặc Part-time).
+ */
+public abstract class Student {
+    /**
+     * Mã sinh viên (ví dụ: "SV001").
+     */
+    private String studentID;
+
+    /**
+     * Tên sinh viên (ví dụ: "Nguyễn Văn A").
+     */
+    private String studentName;
+
+    /**
+     * Loại sinh viên ("Credit-based" hoặc "Part-time").
+     */
+    private String studentType;
+
+    /**
+     * Ngành của sinh viên (ví dụ: "Computer Science").
+     */
+    private String major;
+
+    /**
+     * Danh sách mã học phần đã hoàn thành.
+     */
+    private List<String> completedCourseIDs;
+
+    /**
+     * Constructor mặc định, khởi tạo danh sách completedCourseIDs.
+     */
+    public Student() {
+        this.completedCourseIDs = new ArrayList<>();
+    }
+
+    /**
+     * Constructor đầy đủ tham số (chưa bao gồm completedCourseIDs).
+     *
+     * @param studentID      Mã sinh viên
+     * @param studentName    Họ và tên sinh viên
+     * @param studentType    Loại sinh viên
+     * @param major          Ngành học
+     */
+    public Student(String studentID, String studentName, String studentType, String major) {
+        this.studentID = studentID;
+        this.studentName = studentName;
+        this.studentType = studentType;
+        this.major = major;
+        this.completedCourseIDs = new ArrayList<>();
+    }
+
+    // ===== Getter và Setter =====
+
+    public String getStudentID() {
+        return studentID;
+    }
+
+    public void setStudentID(String studentID) {
+        this.studentID = studentID;
+    }
+
+    public String getStudentName() {
+        return studentName;
+    }
+
+    public void setStudentName(String studentName) {
+        this.studentName = studentName;
+    }
+
+    public String getStudentType() {
+        return studentType;
+    }
+
+    public void setStudentType(String studentType) {
+        this.studentType = studentType;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    public List<String> getCompletedCourseIDs() {
+        return completedCourseIDs;
+    }
+
+    public void setCompletedCourseIDs(List<String> completedCourseIDs) {
+        this.completedCourseIDs = completedCourseIDs;
+    }
+
+    // ===== Phương thức hỗ trợ quản lý completedCourseIDs =====
+
+    /**
+     * Thêm mã học phần vào danh sách completedCourseIDs (nếu chưa tồn tại).
+     * @param courseID   Mã học phần
+     */
+    public void addCompletedCourseID(String courseID) {
+        if (courseID != null && !courseID.trim().isEmpty() && !completedCourseIDs.contains(courseID)) {
+            completedCourseIDs.add(courseID);
+        }
+    }
+
+    /**
+     * Loại bỏ mã học phần khỏi danh sách completedCourseIDs.
+     * @param courseID   Mã học phần
+     */
+    public void removeCompletedCourseID(String courseID) {
+        completedCourseIDs.remove(courseID);
+    }
+
+    // ===== Phương thức trừu tượng =====
+
+    /**
+     * Tính điểm tổng kết (CPA hoặc tương tự) của sinh viên.
+     * @return  Điểm tổng kết
+     */
+    public abstract double calculateFinalGrade();
+
+    /**
+     * Kiểm tra điều kiện tốt nghiệp của sinh viên.
+     * @return  true nếu đủ điều kiện, false nếu chưa
+     */
+    public abstract boolean checkGraduation();
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "studentID='" + studentID + '\'' +
+                ", studentName='" + studentName + '\'' +
+                ", studentType='" + studentType + '\'' +
+                ", major='" + major + '\'' +
+                ", completedCourseIDs=" + completedCourseIDs +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Student)) return false;
+        Student s = (Student) o;
+        return Objects.equals(studentID, s.studentID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(studentID);
+    }
+}

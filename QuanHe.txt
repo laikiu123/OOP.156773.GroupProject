@@ -1,0 +1,317 @@
+1. Package SVBK.model
+------------------------
+Course.java
+------------------------
+Thuộc tính:
+
+	courseID: String
+
+	courseName: String
+
+	creditCount: int
+	
+	preCourseID: String
+
+	midtermScore: double
+
+	finalScore: double
+
+	finalWeight: double
+
+Phương thức:
+
+	calculateFinalGrade(): double
+
+	hasPrerequisite(): boolean
+
+	Getter/Setter các trường
+
+Quan hệ:
+
+	Aggregation trong Program (ở requiredCourses & electiveCourses)
+
+	Aggregation trong CreditBasedStudent.registeredCourses
+
+	Dependency khi tính điểm trong GradingSystem
+
+------------------------
+Student (abstract)
+------------------------
+
+Thuộc tính:
+
+	studentID: String
+
+	studentName: String
+
+	studentType: String
+
+	completedCourseIDs: List<String>
+
+Phương thức trừu tượng:
+
+	calculateFinalGrade(): double
+
+	checkGraduation(): boolean
+
+Quan hệ:
+
+	Lớp cha của CreditBasedStudent & PartTimeStudent
+
+------------------------
+CreditBasedStudent extends Student
+------------------------
+
+Thuộc tính:
+
+	registeredCourses: List<Course>
+
+	completedCredits: int
+
+	program: Program
+
+Phương thức:
+
+	checkPrerequisites(Course): boolean
+
+	registerCourse(Course): boolean
+
+	completeCourse(Course): void
+	
+	override calculateFinalGrade() & checkGraduation()
+
+Quan hệ:
+
+	Kế thừa từ Student
+
+	Composition với Program
+
+	Aggregation với Course qua registeredCourses
+
+	Dependency vào Program để kiểm tra tốt nghiệp
+
+------------------------
+PartTimeStudent extends Student
+------------------------
+
+Thuộc tính:
+
+	program: Program
+
+Phương thức:
+
+	override calculateFinalGrade() & checkGraduation()
+
+Quan hệ:
+
+	Kế thừa từ Student
+
+	Composition với Program
+
+------------------------
+Program
+------------------------
+
+Thuộc tính:
+
+	majorName: String
+
+	requiredCourses: List<Course>
+
+	electiveCourses: List<Course>
+
+	electiveCreditRequirement: int
+
+	totalCreditRequirement: int
+
+Phương thức:
+
+	hasCompletedAllRequired(CreditBasedStudent): boolean
+
+	countCompletedElectiveCredits(CreditBasedStudent): int
+
+Quan hệ:
+
+	Aggregation với Course (hai danh sách)
+
+	Referenced by CreditBasedStudent & PartTimeStudent
+
+
+2. Package SVBK.manager
+------------------------
+StudentManager
+------------------------
+
+Thuộc tính:
+
+	listStudents: List<Student>
+
+Phương thức:
+
+	addStudent(Student): boolean
+
+	removeStudent(String): boolean
+
+	findStudent(String): Student
+
+	editStudent(String, Student): boolean
+
+	getAllStudents(): List<Student>
+
+Quan hệ:
+
+	Aggregation với Student
+
+------------------------
+ProgramManager
+------------------------
+
+Thuộc tính:
+
+	listPrograms: List<Program>
+
+Phương thức:
+
+	addProgram(Program): boolean
+
+	removeProgram(String): boolean
+
+	findProgram(String): Program
+
+	editProgram(String, Program): boolean
+
+	getAllPrograms(): List<Program>
+
+Quan hệ:
+
+	Aggregation với Program
+
+------------------------
+CourseManager
+------------------------
+
+Thuộc tính:
+
+	listCourses: List<Course>
+
+	programManager: ProgramManager
+
+Phương thức:
+
+	addCourse(Course): boolean
+
+	removeCourse(String): boolean → cascade xóa khỏi mọi Program qua programManager
+
+	findCourse(String): Course
+
+	editCourse(String, Course): boolean
+
+	getAllCourses(): List<Course>
+
+Quan hệ:
+
+	Aggregation với Course
+
+	Dependency/Composition với ProgramManager để cascade xóa
+
+
+3. Package SVBK.service
+------------------------
+GradingSystem
+------------------------
+
+Phương thức:
+
+	enterGrade(Student, Course, double, double): void
+
+	calculateCPA(Student): double
+
+Quan hệ:
+
+	Dependency vào Student & Course
+
+------------------------
+GraduationValidator
+------------------------
+
+Phương thức:
+
+	checkGraduation(Student): boolean
+
+Quan hệ:
+
+	Dependency vào Student
+
+
+4. Package SVBK.app
+------------------------
+StudentManagementSystem
+------------------------
+
+Phương thức:
+
+	main(String[] args)
+
+	mainMenu(): void
+
+	handleStudentManagement(): void
+
+	handleCourseManagement(): void
+
+	handleGrading(): void
+
+	handleGraduationCheck(): void
+
+Quan hệ:
+
+	Dependency vào StudentManager, ProgramManager, CourseManager, GradingSystem, GraduationValidator
+
+
+
+---------------------------------------------------------------
+Các mối quan hệ chính:
+---------------------------------------------------------------
+Inheritance:
+Student
+  ├─ CreditBasedStudent
+  └─ PartTimeStudent
+
+Aggregation/Composition:
+	Program <>── Course
+	StudentManager <>── Student
+	ProgramManager <>── Program
+	CourseManager <>── Course
+	CreditBasedStudent <>── Program
+	PartTimeStudent <>── Program
+	CourseManager ──▶ ProgramManager
+
+Dependency:
+	GradingSystem --> Student, Course
+	GraduationValidator --> Student
+	StudentManagementSystem --> StudentManager, ProgramManager, CourseManager, GradingSystem, GraduationValidator
+
+---------------------------------------------------------------
+Cấu trúc project:
+---------------------------------------------------------------
+src/
+└─ main/
+   └─ java/
+      └─ SVBK/
+         ├─ model/                     ← Domain objects
+         │  ├─ Course.java
+         │  ├─ Student.java
+         │  ├─ CreditBasedStudent.java
+         │  ├─ PartTimeStudent.java
+         │  └─ Program.java
+         │
+         ├─ manager/                   ← CRUD và tìm kiếm
+         │  ├─ StudentManager.java
+         │  └─ CourseManager.java
+         │  └─ ProgramManager.java
+         │
+         ├─ service/                   ← Business logic
+         │  ├─ GradingSystem.java
+         │  └─ GraduationValidator.java
+         │
+         └─ app/                       ← Controller / UI
+            └─ StudentManagementSystem.java

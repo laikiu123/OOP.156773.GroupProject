@@ -1,0 +1,116 @@
+// File: SVBK/manager/CourseManager.java
+package SVBK.manager;
+
+import SVBK.model.Course;
+import SVBK.model.Program;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Quản lý danh sách học phần (Course).
+ * Tự động đồng bộ xóa khỏi các Program liên quan khi một Course bị xóa.
+ */
+public class CourseManager {
+    /**
+     * Danh sách các Course hiện có trong hệ thống.
+     */
+    private List<Course> listCourses;
+
+    /**
+     * Tham chiếu đến ProgramManager để thực hiện cascade xóa trên Program.
+     */
+    private ProgramManager programManager;
+
+    /**
+     * Constructor khởi tạo CourseManager với ProgramManager để quản lý cascade.
+     *
+     * @param programManager đối tượng quản lý Program
+     */
+    public CourseManager(ProgramManager programManager) {
+        this.listCourses = new ArrayList<>();
+        this.programManager = programManager;
+    }
+
+    /**
+     * Thêm một Course mới vào danh sách.
+     *
+     * @param course Đối tượng Course cần thêm
+     * @return true nếu thêm thành công; false nếu course null hoặc đã tồn tại (trùng courseID)
+     */
+    public boolean addCourse(Course course) {
+        if (course == null || findCourse(course.getCourseID()) != null) {
+            return false;
+        }
+        listCourses.add(course);
+        return true;
+    }
+
+    /**
+     * Xóa Course khỏi danh sách theo courseID và cascade xóa khỏi tất cả Program.
+     *
+     * @param courseID Mã học phần cần xóa
+     * @return true nếu xóa thành công; false nếu không tìm thấy courseID
+     */
+    public boolean removeCourse(String courseID) {
+        // Tìm Course trong danh sách
+        Course c = findCourse(courseID);
+        if (c == null) {
+            return false;
+        }
+        // Xóa khỏi danh sách trung tâm
+        listCourses.remove(c);
+        // Cascade: xóa khỏi requiredCourses và electiveCourses của mỗi Program
+        for (Program p : programManager.getAllPrograms()) {
+            p.getRequiredCourses().removeIf(course -> courseID.equals(course.getCourseID()));
+            p.getElectiveCourses().removeIf(course -> courseID.equals(course.getCourseID()));
+        }
+        return true;
+    }
+
+    /**
+     * Tìm kiếm Course theo courseID.
+     *
+     * @param courseID mã học phần cần tìm
+     * @return Course nếu tồn tại; null nếu không tìm thấy hoặc input không hợp lệ
+     */
+    public Course findCourse(String courseID) {
+        if (courseID == null || courseID.trim().isEmpty()) {
+            return null;
+        }
+        for (Course c : listCourses) {
+            if (courseID.equals(c.getCourseID())) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sửa thông tin Course đã tồn tại.
+     *
+     * @param courseID  Mã học phần cần sửa
+     * @param newCourse Đối tượng Course chứa thông tin mới; courseID phải khớp
+     * @return true nếu sửa thành công; false nếu không tìm thấy hoặc input không hợp lệ
+     */
+    public boolean editCourse(String courseID, Course newCourse) {
+        if (newCourse == null || courseID == null || !courseID.equals(newCourse.getCourseID())) {
+            return false;
+        }
+        for (int i = 0; i < listCourses.size(); i++) {
+            if (courseID.equals(listCourses.get(i).getCourseID())) {
+                listCourses.set(i, newCourse);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Lấy danh sách tất cả Course dưới dạng bản sao.
+     *
+     * @return List<Course> sao chép từ listCourses
+     */
+    public List<Course> getAllCourses() {
+        return new ArrayList<>(listCourses);
+    }
+}

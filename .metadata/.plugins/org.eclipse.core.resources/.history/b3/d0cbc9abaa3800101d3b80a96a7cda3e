@@ -1,0 +1,126 @@
+// File: SVBK/model/PartTimeStudent.java
+package SVBK.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Lớp con đại diện cho sinh viên hệ niên chế (Part-time).
+ * Kế thừa từ lớp trừu tượng Student.
+ */
+public class PartTimeStudent extends Student {
+    /**
+     * Danh sách học phần bắt buộc (do trường quy định).
+     */
+    private List<Course> requiredCourses;
+
+    /**
+     * Điểm trung bình tối thiểu để được tốt nghiệp (trên thang 10).
+     */
+    private static final double MIN_AVERAGE = 5.0;
+
+    /**
+     * Constructor mặc định.
+     * Khởi tạo danh sách requiredCourses và đặt studentType.
+     */
+    public PartTimeStudent() {
+        super();
+        this.requiredCourses = new ArrayList<>();
+        setStudentType("Part-time");
+    }
+
+    /**
+     * Constructor đầy đủ tham số.
+     *
+     * @param studentID    Mã sinh viên
+     * @param studentName  Tên sinh viên
+     * @param major        Ngành học
+     */
+    public PartTimeStudent(String studentID, String studentName, String major) {
+        super(studentID, studentName, "Part-time", major);
+        this.requiredCourses = new ArrayList<>();
+    }
+
+    // ===== Getter / Setter =====
+
+    /**
+     * Lấy danh sách học phần bắt buộc.
+     *
+     * @return List các đối tượng Course bắt buộc
+     */
+    public List<Course> getRequiredCourses() {
+        return requiredCourses;
+    }
+
+    /**
+     * Thiết lập danh sách học phần bắt buộc.
+     *
+     * @param requiredCourses List các đối tượng Course
+     */
+    public void setRequiredCourses(List<Course> requiredCourses) {
+        this.requiredCourses = requiredCourses;
+    }
+
+    /**
+     * Lấy danh sách mã học phần bắt buộc.
+     *
+     * @return List<String> chứa mã các học phần
+     */
+    public List<String> getCourseIDList() {
+        List<String> ids = new ArrayList<>();
+        for (Course c : requiredCourses) {
+            if (c != null && c.getCourseID() != null) {
+                ids.add(c.getCourseID());
+            }
+        }
+        return ids;
+    }
+
+    // ===== Cài đặt phương thức trừu tượng =====
+
+    /**
+     * Tính điểm trung bình của sinh viên dựa trên các học phần bắt buộc:
+     * trung bình cộng các điểm tổng kết của từng học phần.
+     *
+     * @return Điểm trung bình (nếu không có học phần, trả về 0)
+     */
+    @Override
+    public double calculateFinalGrade() {
+        if (requiredCourses.isEmpty()) {
+            return 0.0;
+        }
+        double sum = 0.0;
+        for (Course c : requiredCourses) {
+            sum += c.calculateFinalGrade();
+        }
+        return sum / requiredCourses.size();
+    }
+
+    /**
+     * Kiểm tra điều kiện tốt nghiệp:
+     * - Đã hoàn thành tất cả học phần bắt buộc.
+     * - Điểm trung bình >= MIN_AVERAGE.
+     *
+     * @return true nếu đủ điều kiện tốt nghiệp, false nếu không
+     */
+    @Override
+    public boolean checkGraduation() {
+        // 1) Kiểm tra hoàn thành tất cả học phần bắt buộc
+        for (Course c : requiredCourses) {
+            String id = c.getCourseID();
+            if (id == null || !getCompletedCourseIDs().contains(id)) {
+                return false;
+            }
+        }
+        // 2) Kiểm tra điểm trung bình
+        return calculateFinalGrade() >= MIN_AVERAGE;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() +
+               ", PartTimeStudent{" +
+               "requiredCourses=" + requiredCourses +
+               '}';
+    }
+}

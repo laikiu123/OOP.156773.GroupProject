@@ -1,0 +1,289 @@
+// File: SVBK/app/StudentManagementSystem.java
+package SVBK.app;
+
+import SVBK.manager.StudentManager;
+import SVBK.manager.ProgramManager;
+import SVBK.manager.CourseManager;
+import SVBK.service.GradingSystem;
+import SVBK.service.GraduationValidator;
+import SVBK.model.Student;
+import SVBK.model.Course;
+import SVBK.model.Program;
+import SVBK.model.CreditBasedStudent;
+import SVBK.model.PartTimeStudent;
+
+import java.util.List;
+import java.util.Scanner;
+
+/**
+ * Controller chính của hệ thống Student Management.
+ * Đảm nhiệm menu console và điều phối các Manager/Service.
+ */
+public class StudentManagementSystem {
+    // Managers và services
+    private StudentManager studentManager;
+    private ProgramManager programManager;
+    private CourseManager courseManager;
+    private GradingSystem gradingSystem;
+    private GraduationValidator graduationValidator;
+
+    // Scanner cho input từ console
+    private Scanner scanner;
+
+    /**
+     * Constructor khởi tạo tất cả thành phần cần thiết.
+     */
+    public StudentManagementSystem() {
+        this.programManager = new ProgramManager();
+        this.courseManager  = new CourseManager(programManager);
+        this.studentManager = new StudentManager();
+        this.gradingSystem  = new GradingSystem();
+        this.graduationValidator = new GraduationValidator();
+        this.scanner = new Scanner(System.in);
+    }
+
+    /**
+     * Điểm vào chương trình, hiển thị menu chính.
+     */
+    public static void main(String[] args) {
+        StudentManagementSystem sms = new StudentManagementSystem();
+        sms.mainMenu();
+    }
+
+    /**
+     * Menu chính, cho phép chọn chức năng:
+     * 1. Quản lý sinh viên
+     * 2. Quản lý học phần
+     * 3. Nhập điểm
+     * 4. Kiểm tra tốt nghiệp
+     * 0. Thoát
+     */
+    public void mainMenu() {
+        while (true) {
+            System.out.println("=== Student Management System by SVBK ===");
+            System.out.println("1. Quản lý sinh viên");
+            System.out.println("2. Quản lý học phần");
+            System.out.println("3. Nhập điểm");
+            System.out.println("4. Kiểm tra tốt nghiệp");
+            System.out.println("0. Thoát");
+            System.out.print("Lựa chọn của bạn: ");
+            int choice = Integer.parseInt(scanner.nextLine());
+            switch (choice) {
+                case 1: handleStudentManagement(); break;
+                case 2: handleCourseManagement(); break;
+                case 3: handleGrading(); break;
+                case 4: handleGraduationCheck(); break;
+                case 0:
+                    System.out.println("Kết thúc chương trình. Tạm biệt!");
+                    return;
+                default:
+                    System.out.println("Lựa chọn không hợp lệ, vui lòng thử lại.");
+            }
+        }
+    }
+
+    /**
+     * Xử lý menu quản lý sinh viên: thêm, xóa, tìm, sửa, danh sách.
+     */
+    private void handleStudentManagement() {
+        while (true) {
+            System.out.println("--- Quản lý sinh viên ---");
+            System.out.println("1. Thêm sinh viên");
+            System.out.println("2. Xóa sinh viên");
+            System.out.println("3. Tìm sinh viên");
+            System.out.println("4. Sửa sinh viên");
+            System.out.println("5. Danh sách sinh viên");
+            System.out.println("0. Quay lại");
+            System.out.print("Chọn chức năng: ");
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice == 0) return;
+            switch (choice) {
+                case 1: {
+                    System.out.print("Mã SV: "); String id = scanner.nextLine();
+                    System.out.print("Tên SV: "); String name = scanner.nextLine();
+                    System.out.print("Chọn hệ (1-Tín chỉ, 2-Niên chế): ");
+                    int type = Integer.parseInt(scanner.nextLine());
+                    if (type == 1) {
+                        // Yêu cầu tạo Program và khởi tạo
+                        System.out.print("Tên chương trình (ngành): ");
+                        String major = scanner.nextLine();
+                        Program prog = programManager.findProgram(major);
+                        if (prog == null) {
+                            System.out.println("Chương trình không tồn tại, vui lòng thêm trước.");
+                        } else {
+                            studentManager.addStudent(new CreditBasedStudent(id, name, prog));
+                            System.out.println("Đã thêm SV tín chỉ.");
+                        }
+                    } else if (type == 2) {
+                        System.out.print("Tên chương trình (ngành): ");
+                        String major = scanner.nextLine();
+                        Program prog = programManager.findProgram(major);
+                        if (prog == null) {
+                            System.out.println("Chương trình không tồn tại, vui lòng thêm trước.");
+                        } else {
+                            studentManager.addStudent(new PartTimeStudent(id, name, prog));
+                            System.out.println("Đã thêm SV niên chế.");
+                        }
+                    } else {
+                        System.out.println("Hệ không hợp lệ.");
+                    }
+                    break;
+                }
+                case 2: {
+                    System.out.print("Mã SV cần xóa: ");
+                    String id = scanner.nextLine();
+                    if (studentManager.removeStudent(id)) {
+                        System.out.println("Xóa thành công.");
+                    } else {
+                        System.out.println("Không tìm thấy SV.");
+                    }
+                    break;
+                }
+                case 3: {
+                    System.out.print("Mã SV cần tìm: ");
+                    String id = scanner.nextLine();
+                    Student s = studentManager.findStudent(id);
+                    System.out.println(s != null ? s : "Không tìm thấy SV.");
+                    break;
+                }
+                case 4: {
+                    System.out.print("Mã SV cần sửa: ");
+                    String id = scanner.nextLine();
+                    Student old = studentManager.findStudent(id);
+                    if (old == null) {
+                        System.out.println("Không tìm thấy SV.");
+                    } else {
+                        System.out.print("Tên mới: ");
+                        String newName = scanner.nextLine();
+                        old.setStudentName(newName);
+                        studentManager.editStudent(id, old);
+                        System.out.println("Cập nhật thành công.");
+                    }
+                    break;
+                }
+                case 5: {
+                    List<Student> list = studentManager.getAllStudents();
+                    for (Student s : list) System.out.println(s);
+                    break;
+                }
+                default:
+                    System.out.println("Chức năng không hợp lệ.");
+            }
+        }
+    }
+
+    /**
+     * Xử lý menu quản lý học phần: thêm, xóa, tìm, sửa, danh sách.
+     */
+    private void handleCourseManagement() {
+        while (true) {
+            System.out.println("--- Quản lý học phần ---");
+            System.out.println("1. Thêm học phần");
+            System.out.println("2. Xóa học phần");
+            System.out.println("3. Tìm học phần");
+            System.out.println("4. Sửa học phần");
+            System.out.println("5. Danh sách học phần");
+            System.out.println("0. Quay lại");
+            System.out.print("Chọn chức năng: ");
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice == 0) return;
+            switch (choice) {
+                case 1: {
+                    System.out.print("Mã HP: "); String id = scanner.nextLine();
+                    System.out.print("Tên HP: "); String name = scanner.nextLine();
+                    System.out.print("Số tín chỉ: "); int credits = Integer.parseInt(scanner.nextLine());
+                    System.out.print("HP tiên quyết (nếu có): "); String pre = scanner.nextLine();
+                    Course c = new Course(id, name, credits, pre, 0.5);
+                    if (courseManager.addCourse(c)) System.out.println("Thêm thành công.");
+                    else System.out.println("Thêm thất bại hoặc đã tồn tại.");
+                    break;
+                }
+                case 2: {
+                    System.out.print("Mã HP cần xóa: ");
+                    String id = scanner.nextLine();
+                    if (courseManager.removeCourse(id)) System.out.println("Xóa thành công.");
+                    else System.out.println("Không tìm thấy HP.");
+                    break;
+                }
+                case 3: {
+                    System.out.print("Mã HP cần tìm: ");
+                    String id = scanner.nextLine();
+                    Course c = courseManager.findCourse(id);
+                    System.out.println(c != null ? c : "Không tìm thấy HP.");
+                    break;
+                }
+                case 4: {
+                    System.out.print("Mã HP cần sửa: ");
+                    String id = scanner.nextLine();
+                    Course old = courseManager.findCourse(id);
+                    if (old == null) {
+                        System.out.println("Không tìm thấy HP.");
+                    } else {
+                        System.out.print("Tên mới: ");
+                        old.setCourseName(scanner.nextLine());
+                        courseManager.editCourse(id, old);
+                        System.out.println("Cập nhật thành công.");
+                    }
+                    break;
+                }
+                case 5: {
+                    List<Course> list = courseManager.getAllCourses();
+                    for (Course c : list) System.out.println(c);
+                    break;
+                }
+                default:
+                    System.out.println("Chức năng không hợp lệ.");
+            }
+        }
+    }
+
+    /**
+     * Xử lý nhập điểm cho sinh viên.
+     */
+    private void handleGrading() {
+        System.out.println("--- Nhập điểm ---");
+        System.out.print("Mã SV: "); String sid = scanner.nextLine();
+        Student s = studentManager.findStudent(sid);
+        if (s == null) {
+            System.out.println("Không tìm thấy SV.");
+            return;
+        }
+        System.out.print("Mã HP: "); String cid = scanner.nextLine();
+        Course c = courseManager.findCourse(cid);
+        if (c == null) {
+            System.out.println("Không tìm thấy HP.");
+            return;
+        }
+        System.out.print("Điểm giữa kỳ: "); double mid = Double.parseDouble(scanner.nextLine());
+        System.out.print("Điểm cuối kỳ: "); double fin = Double.parseDouble(scanner.nextLine());
+        if (gradingSystem.enterGrade(s, c, mid, fin)) {
+            System.out.println("Nhập điểm thành công.");
+            // Nếu là tín chỉ và chưa đăng ký, thêm vào
+            if (s instanceof CreditBasedStudent) {
+                ((CreditBasedStudent) s).registerCourse(c);
+            }
+        } else {
+            System.out.println("Nhập điểm thất bại. Kiểm tra lại.");
+        }
+    }
+
+    /**
+     * Xử lý kiểm tra điều kiện và xếp loại tốt nghiệp.
+     */
+    private void handleGraduationCheck() {
+        System.out.println("--- Kiểm tra tốt nghiệp ---");
+        System.out.print("Mã SV: "); String sid = scanner.nextLine();
+        Student s = studentManager.findStudent(sid);
+        if (s == null) {
+            System.out.println("Không tìm thấy SV.");
+            return;
+        }
+        boolean ok = graduationValidator.checkGraduation(s);
+        String type = graduationValidator.typeGraduation(s);
+        int credits = graduationValidator.calNumCredits(s);
+        System.out.printf("SV %s - %s\n", s.getStudentID(), s.getStudentName());
+        System.out.printf("Tổng tín chỉ: %d\n", credits);
+        System.out.printf("Điều kiện tốt nghiệp: %s\n", ok ? "Đủ điều kiện" : "Chưa đủ điều kiện");
+        System.out.printf("Xếp loại học lực: %s\n", type);
+    }
+}

@@ -1,0 +1,67 @@
+// File: SVBK/model/CreditBasedStudent.java
+package SVBK.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Sinh viên hệ tín chỉ.
+ * Điểm giữa kỳ và cuối kỳ nhập theo thang 10, sau đó tính điểm tổng kết (thang 10)
+ * rồi quy đổi sang thang 4:
+ *   - A (8.5–10) -> 4.0
+ *   - B (7.0–8.4) -> 3.0
+ *   - C (5.5–6.9) -> 2.0
+ *   - D (4.0–5.4) -> 1.0
+ *   - F (<4.0)    -> 0.0
+ */
+public class CreditBasedStudent extends Student {
+    private List<Course> registeredCourses;
+    private int completedCredits;
+    private Program program;
+
+    /**
+     * Khởi tạo sinh viên hệ tín chỉ với Program tương ứng.
+     */
+    public CreditBasedStudent(String studentID, String studentName, Program program) {
+        super(studentID, studentName, "Credit-based");
+        this.program = program;
+        this.registeredCourses = new ArrayList<>();
+        this.completedCredits = 0;
+    }
+
+    // Getter / Setter omitted for brevity
+
+    /**
+     * Tính điểm trung bình (CPA) theo thang 10 có trọng số tín chỉ.
+     */
+    private double calculateAverage10() {
+        double totalPoints = 0;
+        int totalCredits = 0;
+        for (Course c : registeredCourses) {
+            totalPoints += c.calculateFinalGrade() * c.getCreditCount(); // calculateFinalGrade() returns thang 10
+            totalCredits += c.getCreditCount();
+        }
+        return totalCredits == 0 ? 0.0 : totalPoints / totalCredits;
+    }
+
+    /**
+     * Tính CPA quy đổi sang thang 4.
+     */
+    @Override
+    public double calculateFinalGrade() {
+        double avg10 = calculateAverage10();
+        if (avg10 >= 8.5) return 4.0;
+        if (avg10 >= 7.0) return 3.0;
+        if (avg10 >= 5.5) return 2.0;
+        if (avg10 >= 4.0) return 1.0;
+        return 0.0;
+    }
+
+    @Override
+    public boolean checkGraduation() {
+        // logic unchanged
+        if (!program.hasCompletedAllRequired(this)) return false;
+        if (program.countCompletedElectiveCredits(this) < program.getElectiveCreditRequirement()) return false;
+        return completedCredits >= program.getTotalCreditRequirement();
+    }
+}

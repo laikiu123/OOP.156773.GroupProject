@@ -1,0 +1,184 @@
+// File: SVBK/model/CreditBasedStudent.java
+package SVBK.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Lớp con đại diện cho sinh viên học theo hệ tín chỉ.
+ * Kế thừa từ lớp trừu tượng Student.
+ */
+public class CreditBasedStudent extends Student {
+    /**
+     * Danh sách các học phần mà sinh viên đã đăng ký.
+     */
+    private List<Course> registeredCourses;
+
+    /**
+     * Số tín chỉ đã hoàn thành (được cập nhật khi sinh viên hoàn thành khóa học).
+     */
+    private int completedCredits;
+
+    /**
+     * Số tín chỉ yêu cầu để tốt nghiệp (có thể tùy chỉnh theo chương trình thực tế).
+     */
+    private static final int REQUIRED_CREDITS = 120;
+
+    /**
+     * Constructor mặc định.
+     * Khởi tạo danh sách đăng ký và đặt studentType mặc định.
+     */
+    public CreditBasedStudent() {
+        super();
+        // Khởi tạo danh sách học phần đã đăng ký
+        this.registeredCourses = new ArrayList<>();
+        this.completedCredits = 0;
+        // Ghi đè type thành "Credit-based"
+        setStudentType("Credit-based");
+    }
+
+    /**
+     * Constructor đầy đủ tham số.
+     * @param studentID    Mã sinh viên
+     * @param studentName  Tên sinh viên
+     * @param major        Ngành học
+     */
+    public CreditBasedStudent(String studentID, String studentName, String major) {
+        super(studentID, studentName, "Credit-based", major);
+        this.registeredCourses = new ArrayList<>();
+        this.completedCredits = 0;
+    }
+
+    // ===== Getter / Setter =====
+
+    /** @return Danh sách học phần đã đăng ký */
+    public List<Course> getRegisteredCourses() {
+        return registeredCourses;
+    }
+
+    /**
+     * @param registeredCourses Thiết lập lại danh sách học phần đã đăng ký
+     */
+    public void setRegisteredCourses(List<Course> registeredCourses) {
+        this.registeredCourses = registeredCourses;
+    }
+
+    /** @return Số tín chỉ đã hoàn thành */
+    public int getCompletedCredits() {
+        return completedCredits;
+    }
+
+    /**
+     * @param completedCredits Thiết lập lại số tín chỉ đã hoàn thành
+     */
+    public void setCompletedCredits(int completedCredits) {
+        this.completedCredits = completedCredits;
+    }
+
+    // ===== Phương thức chính =====
+
+    /**
+     * Kiểm tra điều kiện tiên quyết của một học phần.
+     * Nếu học phần không có prerequisite, trả về true.
+     * @param course Học phần cần đăng ký
+     * @return true nếu đã thỏa mãn prerequisite hoặc không có
+     */
+    public boolean checkPrerequisites(Course course) {
+        String preID = course.getPreCourseID();
+        // Nếu không có prerequisite (null hoặc rỗng) → được phép
+        if (preID == null || preID.trim().isEmpty()) {
+            return true;
+        }
+        // Ngược lại, phải nằm trong danh sách đã hoàn thành
+        return getCompletedCourseIDs().contains(preID);
+    }
+
+    /**
+     * Đăng ký một học phần vào danh sách registeredCourses.
+     * - Kiểm tra null
+     * - Kiểm tra prerequisite
+     * - Kiểm tra chưa đăng ký trước đó
+     * @param course Học phần cần đăng ký
+     * @return true nếu đăng ký thành công, false nếu không
+     */
+    public boolean registerCourse(Course course) {
+        if (course == null) {
+            return false;
+        }
+        // Kiểm tra prerequisite
+        if (!checkPrerequisites(course)) {
+            return false;
+        }
+        // Không đăng ký trùng
+        for (Course c : registeredCourses) {
+            if (c.getCourseID().equals(course.getCourseID())) {
+                return false;
+            }
+        }
+        registeredCourses.add(course);
+        return true;
+    }
+
+    /**
+     * Cập nhật khi sinh viên hoàn thành một học phần:
+     * - Loại khỏi registeredCourses
+     * - Thêm vào completedCourseIDs
+     * - Cộng tín chỉ
+     * @param course Học phần đã hoàn thành
+     */
+    public void completeCourse(Course course) {
+        if (course == null) return;
+        String id = course.getCourseID();
+        // Nếu đang đăng ký và chưa hoàn thành
+        if (registeredCourses.remove(course) &&
+            !getCompletedCourseIDs().contains(id)) {
+            addCompletedCourseID(id);
+            completedCredits += course.getCreditCount();
+        }
+    }
+
+    /**
+     * Tính điểm tổng kết (GPA) của sinh viên tín chỉ:
+     * trung bình có trọng số theo tín chỉ của các học phần đã đăng ký.
+     * @return Điểm trung bình (0 nếu chưa có học phần)
+     */
+    @Override
+    public double calculateFinalGrade() {
+        double totalPoints = 0;
+        int totalCredits = 0;
+        for (Course c : registeredCourses) {
+            double grade = c.calculateFinalGrade();
+            totalPoints += grade * c.getCreditCount();
+            totalCredits += c.getCreditCount();
+        }
+        return totalCredits == 0 ? 0.0 : totalPoints / totalCredits;
+    }
+
+    /**
+     * Kiểm tra điều kiện tốt nghiệp: đã tích lũy đủ tín chỉ.
+     * @return true nếu completedCredits >= REQUIRED_CREDITS
+     */
+    @Override
+    public boolean checkGraduation() {
+        return completedCredits >= REQUIRED_CREDITS;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() +
+               ", CreditBasedStudent{" +
+               "registeredCourses=" + registeredCourses +
+               ", completedCredits=" + completedCredits +
+               '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+}

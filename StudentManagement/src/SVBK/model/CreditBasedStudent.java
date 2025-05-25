@@ -1,0 +1,156 @@
+// File: SVBK/model/CreditBasedStudent.java
+package SVBK.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Sinh viên hệ tín chỉ.
+ * Điểm học phần tính theo thang 10, sau đó quy đổi từng học phần sang thang 4
+ * rồi tính CPA (trung bình có trọng số theo tín chỉ) trên thang 4.
+ */
+public class CreditBasedStudent extends Student {
+    /** Danh sách học phần đã đăng ký. */
+    private List<Course> registeredCourses;
+
+    /** Số tín chỉ đã hoàn thành. */
+    private int completedCredits;
+
+    /** Chương trình đào tạo kèm điều kiện tín chỉ. */
+    private Program program;
+
+    /**
+     * Constructor khởi tạo sinh viên hệ tín chỉ.
+     *
+     * @param studentID   Mã sinh viên
+     * @param studentName Tên sinh viên
+     * @param program     Chương trình đào tạo
+     */
+    public CreditBasedStudent(String studentID, String studentName, Program program) {
+        super(studentID, studentName, "Credit-based");
+        this.program = program;
+        this.registeredCourses = new ArrayList<>();
+        this.completedCredits = 0;
+    }
+
+    // ===== Getter / Setter =====
+
+    /** @return Danh sách học phần đã đăng ký */
+    public List<Course> getRegisteredCourses() {
+        return registeredCourses;
+    }
+
+    /** @param registeredCourses Thiết lập danh sách học phần đã đăng ký */
+    public void setRegisteredCourses(List<Course> registeredCourses) {
+        this.registeredCourses = registeredCourses;
+    }
+
+    /** @return Số tín chỉ đã hoàn thành */
+    public int getCompletedCredits() {
+        return completedCredits;
+    }
+
+    /** @param completedCredits Thiết lập số tín chỉ đã hoàn thành */
+    public void setCompletedCredits(int completedCredits) {
+        this.completedCredits = completedCredits;
+    }
+
+    /** @return Chương trình đào tạo */
+    public Program getProgram() {
+        return program;
+    }
+
+    /** @param program Thiết lập chương trình đào tạo */
+    public void setProgram(Program program) {
+        this.program = program;
+    }
+
+    // ===== Business Methods =====
+
+    /**
+     * Kiểm tra prerequisite của học phần.
+     */
+    public boolean checkPrerequisites(Course course) {
+        String preID = course.getPreCourseID();
+        if (preID == null || preID.trim().isEmpty()) {
+            return true;
+        }
+        return getCompletedCourseIDs().contains(preID);
+    }
+
+    /**
+     * Đăng ký học phần nếu đủ điều kiện và chưa đăng ký.
+     */
+    public boolean registerCourse(Course course) {
+        if (course == null || !checkPrerequisites(course)) {
+            return false;
+        }
+        for (Course c : registeredCourses) {
+            if (c.getCourseID().equals(course.getCourseID())) {
+                return false;
+            }
+        }
+        registeredCourses.add(course);
+        return true;
+    }
+
+    /**
+     * Hoàn thành khóa học: loại khỏi registeredCourses,
+     * thêm vào completedCourseIDs và cộng completedCredits.
+     */
+    public void completeCourse(Course course) {
+        if (course != null && registeredCourses.remove(course)) {
+            addCompletedCourseID(course.getCourseID());
+            completedCredits += course.getCreditCount();
+        }
+    }
+
+    /**
+     * Chuyển điểm học phần từ thang 10 sang thang 4.
+     *
+     * @param grade10 Điểm học phần thang 10
+     * @return Điểm tương ứng thang 4
+     */
+    private double convert10to4(double grade10) {
+        if (grade10 >= 8.5) return 4.0;
+        if (grade10 >= 7.0) return 3.0;
+        if (grade10 >= 5.5) return 2.0;
+        if (grade10 >= 4.0) return 1.0;
+        return 0.0;
+    }
+
+    /**
+     * Tính CPA: quy đổi từng học phần sang thang 4 rồi tính trung bình có trọng số.
+     *
+     * @return CPA thang 4
+     */
+    @Override
+    public double calculateFinalGrade() {
+        double totalPoints = 0;
+        int totalCredits = 0;
+        for (Course c : registeredCourses) {
+            double grade10 = c.calculateFinalGrade(); // thang 10
+            double grade4 = convert10to4(grade10);
+            totalPoints += grade4 * c.getCreditCount();
+            totalCredits += c.getCreditCount();
+        }
+        return totalCredits == 0 ? 0.0 : totalPoints / totalCredits;
+    }
+
+    /**
+     * Kiểm tra điều kiện tốt nghiệp theo Program:
+     * 1) Hoàn thành tất cả requiredCourses
+     * 2) Tích lũy đủ electiveCreditRequirement
+     * 3) completedCredits >= totalCreditRequirement
+     */
+    @Override
+    public boolean checkGraduation() {
+        if (!program.hasCompletedAllRequired(this)) {
+            return false;
+        }
+        if (program.countCompletedElectiveCredits(this) < program.getElectiveCreditRequirement()) {
+            return false;
+        }
+        return completedCredits >= program.getTotalCreditRequirement();
+    }
+}
