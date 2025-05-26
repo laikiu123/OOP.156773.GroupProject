@@ -1,0 +1,110 @@
+// File: SVBK/manager/ProgramManager.java
+package SVBK.manager;
+
+import SVBK.model.Program;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Quản lý danh sách chương trình đào tạo (Program).
+ * Cho phép thêm, xóa, tìm kiếm và chỉnh sửa chương trình.
+ * So khớp tên chương trình không phân biệt chữ hoa/thường.
+ */
+public class ProgramManager {
+    /** Danh sách các Program đang được quản lý. */
+    private List<Program> listPrograms;
+
+    /**
+     * Khởi tạo ProgramManager với danh sách trống.
+     */
+    public ProgramManager() {
+        this.listPrograms = new ArrayList<>();
+    }
+
+    /**
+     * Thêm một Program mới.
+     *
+     * @param program Đối tượng Program cần thêm
+     * @return true nếu thêm thành công;
+     *         false nếu program null hoặc đã tồn tại (trùng majorName không phân biệt hoa thường)
+     */
+    public boolean addProgram(Program program) {
+        if (program == null || findProgram(program.getMajorName()) != null) {
+            return false;
+        }
+        listPrograms.add(program);
+        return true;
+    }
+
+    /**
+     * Xóa Program theo tên ngành (không phân biệt hoa thường).
+     *
+     * @param majorName Tên ngành của Program cần xóa
+     * @return true nếu xóa thành công;
+     *         false nếu không tìm thấy
+     */
+    public boolean removeProgram(String majorName) {
+        Program p = findProgram(majorName);
+        if (p == null) {
+            return false;
+        }
+        listPrograms.remove(p);
+        return true;
+    }
+
+    /**
+     * Tìm kiếm Program theo tên ngành (không phân biệt hoa thường).
+     *
+     * @param majorName Tên ngành cần tìm
+     * @return Program nếu tồn tại; null nếu không tìm thấy hoặc input không hợp lệ
+     */
+    public Program findProgram(String majorName) {
+        if (majorName == null || majorName.trim().isEmpty()) {
+            return null;
+        }
+        String key = majorName.trim();
+        for (Program p : listPrograms) {
+            if (p.getMajorName().trim().equalsIgnoreCase(key)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Cập nhật một Program đã tồn tại.
+     *
+     * @param majorName  Tên ngành của Program cần sửa (theo tên cũ)
+     * @param newProgram Đối tượng Program mới (majorName phải khớp với tham số đầu vào, không phân biệt hoa thường)
+     * @return true nếu cập nhật thành công;
+     *         false nếu không tìm thấy hoặc input không hợp lệ
+     */
+    public boolean editProgram(String majorName, Program newProgram) {
+        if (newProgram == null || majorName == null) {
+            return false;
+        }
+        String key = majorName.trim();
+        for (int i = 0; i < listPrograms.size(); i++) {
+            Program p = listPrograms.get(i);
+            if (p.getMajorName().trim().equalsIgnoreCase(key)) {
+                // Đảm bảo newProgram.majorName cũng trùng tên (không phân biệt hoa thường)
+                if (!newProgram.getMajorName().trim().equalsIgnoreCase(key)) {
+                    return false;
+                }
+                listPrograms.set(i, newProgram);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Lấy bản sao danh sách tất cả Program.
+     *
+     * @return List<Program> sao chép từ listPrograms
+     */
+    public List<Program> getAllPrograms() {
+        return new ArrayList<>(listPrograms);
+    }
+}

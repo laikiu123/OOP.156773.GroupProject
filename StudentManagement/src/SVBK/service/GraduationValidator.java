@@ -36,8 +36,11 @@ public class GraduationValidator {
             return 0;
         }
         int sum = 0;
-        for (Enrollment e : student.getCompletedEnrollments()) {
-            sum += e.getCourse().getCreditCount();
+        // Đếm tín chỉ chỉ khi Enrollment.isPassed() == true
+        for (Enrollment e : student.getEnrollments()) {
+            if (e.isPassed()) {
+                sum += e.getCourse().getCreditCount();
+            }
         }
         return sum;
     }

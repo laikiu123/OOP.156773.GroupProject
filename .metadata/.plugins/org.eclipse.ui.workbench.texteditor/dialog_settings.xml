@@ -4,6 +4,10 @@
 	<section name="java.lang.Class">
 		<item key="replaceBarOpen" value="false"/>
 		<list key="findhistory">
+			<item value="handleProgram"/>
+			<item value="handleStudent"/>
+			<item value="handleGrading"/>
+			<item value="handleGraduation"/>
 			<item value="findStudent"/>
 		</list>
 	</section>

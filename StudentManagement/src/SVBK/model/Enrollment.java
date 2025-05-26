@@ -24,41 +24,19 @@ public class Enrollment {
     }
 
     // ===== Getter / Setter =====
+    public Course getCourse() { return course; }
+    public void setCourse(Course course) { this.course = course; }
 
-    /** @return Course đã đăng ký */
-    public Course getCourse() {
-        return course;
-    }
+    public Double getMidtermScore() { return midtermScore; }
+    public void setMidtermScore(Double midtermScore) { this.midtermScore = midtermScore; }
 
-    /** @param course thiết lập Course đã đăng ký */
-    public void setCourse(Course course) {
-        this.course = course;
-    }
-
-    /** @return Điểm giữa kỳ (có thể null nếu chưa nhập) */
-    public Double getMidtermScore() {
-        return midtermScore;
-    }
-
-    /** @param midtermScore thiết lập điểm giữa kỳ */
-    public void setMidtermScore(Double midtermScore) {
-        this.midtermScore = midtermScore;
-    }
-
-    /** @return Điểm cuối kỳ (có thể null nếu chưa nhập) */
-    public Double getFinalScore() {
-        return finalScore;
-    }
-
-    /** @param finalScore thiết lập điểm cuối kỳ */
-    public void setFinalScore(Double finalScore) {
-        this.finalScore = finalScore;
-    }
+    public Double getFinalScore() { return finalScore; }
+    public void setFinalScore(Double finalScore) { this.finalScore = finalScore; }
 
     // ===== Business Methods =====
 
     /**
-     * Kiểm tra xem học phần đã hoàn thành (đã nhập đủ hai điểm) chưa.
+     * Kiểm tra xem hai điểm đã được nhập hay chưa.
      * @return true nếu midtermScore và finalScore đều khác null
      */
     public boolean isCompleted() {
@@ -66,24 +44,39 @@ public class Enrollment {
     }
 
     /**
-     * Tính điểm tổng kết môn (sử dụng phương thức của Course).
+     * Kiểm tra xem học phần đã đạt hay chưa (điểm tổng kết >= 4.0).
+     * Phải đã nhập đủ điểm và calculateFinalGrade() >= 4.0.
+     * @return true nếu đạt, false nếu chưa hoặc chưa hoàn thành điểm
+     */
+    public boolean isPassed() {
+        return isCompleted() && calculateFinalGrade() >= 4.0;
+    }
+
+    /**
+     * Tính điểm tổng kết môn dựa trên điểm Enrollment và trọng số của Course.
+     * grade = midterm * (1 - finalWeight) + final * finalWeight.
      * Nếu chưa hoàn thành, trả về 0.0.
+     *
      * @return điểm tổng kết môn
      */
     public double calculateFinalGrade() {
         if (!isCompleted()) {
             return 0.0;
         }
-        return course.calculateFinalGrade();
+        double weight = course.getFinalWeight();
+        return midtermScore * (1.0 - weight)
+             + finalScore   * weight;
     }
 
     @Override
     public String toString() {
-        return String.format("%s - %s | GK: %s | CK: %s | KQ: %.2f",
+        return String.format(
+            "%s - %s | GK: %s | CK: %s | KQ: %.2f",
             course.getCourseID(), course.getCourseName(),
-            midtermScore == null ? "--" : midtermScore,
-            finalScore  == null ? "--" : finalScore,
-            isCompleted() ? calculateFinalGrade() : 0.0);
+            midtermScore == null ? "--" : midtermScore.toString(),
+            finalScore  == null ? "--" : finalScore.toString(),
+            calculateFinalGrade()
+        );
     }
 
     @Override
@@ -91,11 +84,14 @@ public class Enrollment {
         if (this == obj) return true;
         if (!(obj instanceof Enrollment)) return false;
         Enrollment other = (Enrollment) obj;
-        return course != null && course.getCourseID().equalsIgnoreCase(other.getCourse().getCourseID());
+        return course != null
+            && course.getCourseID().equalsIgnoreCase(other.getCourse().getCourseID());
     }
 
     @Override
     public int hashCode() {
-        return course == null ? 0 : course.getCourseID().toLowerCase().hashCode();
+        return course == null
+            ? 0
+            : course.getCourseID().toLowerCase().hashCode();
     }
 }

@@ -43,42 +43,30 @@ public abstract class Student {
 
     // ===== Getter / Setter =====
 
-    /** @return Mã sinh viên */
     public String getStudentID() {
         return studentID;
     }
-
-    /** @param studentID Mã sinh viên */
     public void setStudentID(String studentID) {
         this.studentID = studentID;
     }
 
-    /** @return Họ và tên sinh viên */
     public String getStudentName() {
         return studentName;
     }
-
-    /** @param studentName Họ và tên sinh viên */
     public void setStudentName(String studentName) {
         this.studentName = studentName;
     }
 
-    /** @return Loại sinh viên */
     public String getStudentType() {
         return studentType;
     }
-
-    /** @param studentType Loại sinh viên */
     public void setStudentType(String studentType) {
         this.studentType = studentType;
     }
 
-    /** @return Danh sách Enrollment */
     public List<Enrollment> getEnrollments() {
         return enrollments;
     }
-
-    /** @param enrollments Thiết lập danh sách Enrollment */
     public void setEnrollments(List<Enrollment> enrollments) {
         this.enrollments = enrollments;
     }
@@ -97,14 +85,12 @@ public abstract class Student {
     public boolean enrollCourse(Course course) {
         if (course == null) return false;
 
-        // 1) Kiểm tra đã có Enrollment cho course này chưa (đang học hoặc đã hoàn thành)
         for (Enrollment e : enrollments) {
             if (e.getCourse().getCourseID().equalsIgnoreCase(course.getCourseID())) {
-                return false; // đã đăng ký trước đó
+                return false;
             }
         }
 
-        // 2) Kiểm tra prerequisite (nếu có)
         if (course.hasPrerequisite()) {
             String preID = course.getPreCourseID().trim();
             boolean passed = false;
@@ -114,12 +100,9 @@ public abstract class Student {
                     break;
                 }
             }
-            if (!passed) {
-                return false; // chưa hoàn thành học phần tiên quyết
-            }
+            if (!passed) return false;
         }
 
-        // 3) Tất cả điều kiện thỏa, tạo Enrollment mới (chưa có điểm)
         enrollments.add(new Enrollment(course));
         return true;
     }
@@ -144,29 +127,30 @@ public abstract class Student {
     }
 
     /**
-     * Lấy danh sách môn đã hoàn thành.
+     * Lấy danh sách môn đã hoàn thành (đã đạt: điểm tổng kết >= 4.0).
      *
-     * @return List of Enrollment đã complete
+     * @return List of Enrollment đã pass
      */
     public List<Enrollment> getCompletedEnrollments() {
-        List<Enrollment> completed = new ArrayList<>();
+        List<Enrollment> passed = new ArrayList<>();
         for (Enrollment e : enrollments) {
-            if (e.isCompleted()) {
-                completed.add(e);
+            if (e.isPassed()) {
+                passed.add(e);
             }
         }
-        return completed;
+        return passed;
     }
 
     /**
-     * Lấy danh sách môn đang học (chưa hoàn thành).
+     * Lấy danh sách môn đang học (chưa pass):
+     * - Không nhập đủ điểm, hoặc đã nhập nhưng điểm < 4.0.
      *
-     * @return List of Enrollment chưa complete
+     * @return List of Enrollment chưa pass
      */
     public List<Enrollment> getInProgressEnrollments() {
         List<Enrollment> inProgress = new ArrayList<>();
         for (Enrollment e : enrollments) {
-            if (!e.isCompleted()) {
+            if (!e.isPassed()) {
                 inProgress.add(e);
             }
         }
@@ -175,21 +159,8 @@ public abstract class Student {
 
     // ===== Abstract methods =====
 
-    /**
-     * Tính điểm trung bình (CPA) của sinh viên.
-     * - Với Part-time: thang 10
-     * - Với Credit-based: quy đổi từng học phần sang thang 4 rồi tính trung bình
-     *
-     * @return Điểm CPA theo hệ tương ứng
-     */
     public abstract double calculateFinalGrade();
 
-    /**
-     * Kiểm tra điều kiện tốt nghiệp của sinh viên.
-     * Logic chi tiết do lớp con triển khai.
-     *
-     * @return true nếu đủ điều kiện
-     */
     public abstract boolean checkGraduation();
 
     @Override

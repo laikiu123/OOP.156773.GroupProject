@@ -46,7 +46,9 @@ public class CreditBasedStudent extends Student {
      */
     public boolean checkPrerequisites(Course course) {
         String preID = course.getPreCourseID();
-        if (preID == null || preID.trim().isEmpty()) return true;
+        if (preID == null || preID.trim().isEmpty()) {
+            return true;
+        }
         // Đã hoàn thành mô đun prerequisite
         return getCompletedEnrollments().stream()
             .anyMatch(e -> e.getCourse().getCourseID().equalsIgnoreCase(preID));
@@ -55,16 +57,23 @@ public class CreditBasedStudent extends Student {
     /**
      * Đăng ký học phần (Enrollment) nếu đủ điều kiện và có trong chương trình.
      *
-     * @param course Học phần
-     * @return true nếu thêm mới; false nếu không thỏa
+     * @param course Học phần cần đăng ký
+     * @return true nếu thêm mới; false nếu khóa không thuộc chương trình
+     *         hoặc chưa thỏa prerequisite hoặc đã đăng ký trước đó
      */
     public boolean registerCourse(Course course) {
-        // Giáo trình bao gồm required + elective
-        boolean inProgram = program.getRequiredCourses().stream()
-                                .anyMatch(c -> c.getCourseID().equalsIgnoreCase(course.getCourseID()))
-                         || program.getElectiveCourses().stream()
-                                .anyMatch(c -> c.getCourseID().equalsIgnoreCase(course.getCourseID()));
-        if (!inProgram || !checkPrerequisites(course)) return false;
+        if (course == null) {
+            return false;
+        }
+        // Kiểm tra khóa học có trong chương trình này (bắt buộc hoặc tự chọn)
+        if (!program.containsCourse(course.getCourseID())) {
+            return false;
+        }
+        // Kiểm tra điều kiện tiên quyết (nếu có)
+        if (!checkPrerequisites(course)) {
+            return false;
+        }
+        // Delegate cho lớp cha để tạo Enrollment nếu chưa có
         return enrollCourse(course);
     }
 
@@ -79,14 +88,16 @@ public class CreditBasedStudent extends Student {
         double totalPoints = 0;
         int totalCredits = 0;
         for (Enrollment e : completed) {
-            double grade10 = e.getCourse().calculateFinalGrade();
-            // quy đổi sang thang 4
+            // Lấy điểm tổng kết môn từ Enrollment (đã tính theo finalWeight)
+            double grade10 = e.calculateFinalGrade();
+            // Quy đổi grade sang thang 4
             double grade4;
-            if (grade10 >= 8.5) grade4 = 4.0;
+            if (grade10 >= 8.5)      grade4 = 4.0;
             else if (grade10 >= 7.0) grade4 = 3.0;
             else if (grade10 >= 5.5) grade4 = 2.0;
             else if (grade10 >= 4.0) grade4 = 1.0;
-            else grade4 = 0.0;
+            else                     grade4 = 0.0;
+
             totalPoints += grade4 * e.getCourse().getCreditCount();
             totalCredits += e.getCourse().getCreditCount();
         }
@@ -106,16 +117,20 @@ public class CreditBasedStudent extends Student {
         // 1) required
         for (Course rc : program.getRequiredCourses()) {
             boolean done = getCompletedEnrollments().stream()
-                .anyMatch(e -> e.getCourse().getCourseID().equalsIgnoreCase(rc.getCourseID()));
-            if (!done) return false;
+                .anyMatch(e -> e.getCourse().getCourseID()
+                    .equalsIgnoreCase(rc.getCourseID()));
+            if (!done) {
+                return false;
+            }
         }
         // 2) elective credits
         int electiveCredits = getCompletedEnrollments().stream()
-            .filter(e -> program.getElectiveCourses().stream()
-                .anyMatch(ec -> ec.getCourseID().equalsIgnoreCase(e.getCourse().getCourseID())))
+            .filter(e -> program.isElectiveCourse(e.getCourse().getCourseID()))
             .mapToInt(e -> e.getCourse().getCreditCount())
             .sum();
-        if (electiveCredits < program.getElectiveCreditRequirement()) return false;
+        if (electiveCredits < program.getElectiveCreditRequirement()) {
+            return false;
+        }
         // 3) total credits
         int totalCredits = getCompletedEnrollments().stream()
             .mapToInt(e -> e.getCourse().getCreditCount())

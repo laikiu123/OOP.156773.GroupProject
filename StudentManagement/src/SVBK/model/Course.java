@@ -1,3 +1,4 @@
+// File: SVBK/model/Course.java
 package SVBK.model;
 
 import java.util.Objects;
@@ -6,36 +7,36 @@ import java.util.Objects;
  * Đại diện cho một học phần trong hệ thống quản lý sinh viên.
  */
 public class Course {
-    /** Mã học phần, duy nhất trong hệ thống (ví dụ: "CS101") */
+    /** Mã học phần, duy nhất trong hệ thống (ví dụ: "CS101"). */
     private String courseID;
 
-    /** Tên học phần (ví dụ: "Nhập môn Lập trình") */
+    /** Tên học phần (ví dụ: "Nhập môn Lập trình"). */
     private String courseName;
 
-    /** Số tín chỉ của học phần (ví dụ: 3, 4, 2, ...) */
+    /** Số tín chỉ của học phần (ví dụ: 3, 4, 2, ...). */
     private int creditCount;
 
-    /** Mã học phần tiên quyết (prerequisite). Nếu không có thì để null hoặc chuỗi rỗng */
+    /** Mã học phần tiên quyết (prerequisite). Nếu không có thì để null hoặc chuỗi rỗng. */
     private String preCourseID;
 
-    /** Điểm giữa kỳ (midterm) của học phần, khởi tạo mặc định là 0.0 */
-    private double midtermScore;
+    /** Điểm giữa kỳ (midterm). */
+    private Double midtermScore;
 
-    /** Điểm cuối kỳ (final) của học phần, khởi tạo mặc định là 0.0 */
-    private double finalScore;
+    /** Điểm cuối kỳ (final). */
+    private Double finalScore;
 
     /**
      * Trọng số điểm cuối kỳ, dùng để tính điểm tổng kết:
      * ví dụ 0.6 nghĩa là 60% weight cho final, và 1 - finalWeight cho midterm.
+     * Giá trị phải nằm trong khoảng [0.0, 1.0].
      */
     private double finalWeight;
 
     /**
-     * Constructor mặc định.
-     * Thiết lập tất cả các thuộc tính về giá trị mặc định (null hoặc 0).
+     * Constructor mặc định, khởi tạo Enrollment hoặc khi cần tạo placeholder.
      */
     public Course() {
-        // Không làm gì thêm, các trường được khởi tạo tự động
+        // Các trường numeric mặc định là 0, và finalWeight không hợp lệ phải được set sau.
     }
 
     /**
@@ -45,100 +46,97 @@ public class Course {
      * @param courseName   Tên học phần
      * @param creditCount  Số tín chỉ
      * @param preCourseID  Mã học phần tiên quyết (có thể null hoặc "")
-     * @param finalWeight  Trọng số điểm cuối kỳ (giá trị trong [0,1])
+     * @param finalWeight  Trọng số điểm cuối kỳ (phải trong [0.0, 1.0])
+     * @throws IllegalArgumentException nếu finalWeight không hợp lệ
      */
     public Course(String courseID, String courseName, int creditCount,
                   String preCourseID, double finalWeight) {
-        this.courseID    = courseID;
-        this.courseName  = courseName;
+        this.courseID = courseID;
+        this.courseName = courseName;
         this.creditCount = creditCount;
         this.preCourseID = preCourseID;
-        this.finalWeight = finalWeight;
-        // midtermScore và finalScore mặc định là 0.0
+        // Sử dụng setter để validate finalWeight
+        setFinalWeight(finalWeight);
+        // midtermScore và finalScore khởi tạo là null (chưa nhập điểm)
+        this.midtermScore = null;
+        this.finalScore = null;
     }
 
-    // ========== Getter và Setter ==========
+    // ===== Getter và Setter =====
 
-    /** @return Mã học phần */
     public String getCourseID() {
         return courseID;
     }
-
-    /** @param courseID Mã học phần mới */
     public void setCourseID(String courseID) {
         this.courseID = courseID;
     }
 
-    /** @return Tên học phần */
     public String getCourseName() {
         return courseName;
     }
-
-    /** @param courseName Tên học phần mới */
     public void setCourseName(String courseName) {
         this.courseName = courseName;
     }
 
-    /** @return Số tín chỉ */
     public int getCreditCount() {
         return creditCount;
     }
-
-    /** @param creditCount Số tín chỉ mới */
     public void setCreditCount(int creditCount) {
         this.creditCount = creditCount;
     }
 
-    /** @return Mã học phần tiên quyết (có thể null hoặc "") */
     public String getPreCourseID() {
         return preCourseID;
     }
-
-    /** @param preCourseID Mã học phần tiên quyết mới */
     public void setPreCourseID(String preCourseID) {
         this.preCourseID = preCourseID;
     }
 
-    /** @return Điểm giữa kỳ */
-    public double getMidtermScore() {
+    public Double getMidtermScore() {
         return midtermScore;
     }
-
-    /** @param midtermScore Điểm giữa kỳ mới */
-    public void setMidtermScore(double midtermScore) {
+    public void setMidtermScore(Double midtermScore) {
         this.midtermScore = midtermScore;
     }
 
-    /** @return Điểm cuối kỳ */
-    public double getFinalScore() {
+    public Double getFinalScore() {
         return finalScore;
     }
-
-    /** @param finalScore Điểm cuối kỳ mới */
-    public void setFinalScore(double finalScore) {
+    public void setFinalScore(Double finalScore) {
         this.finalScore = finalScore;
     }
 
-    /** @return Trọng số điểm cuối kỳ */
     public double getFinalWeight() {
         return finalWeight;
     }
-
-    /** @param finalWeight Trọng số điểm cuối kỳ mới (0.0 – 1.0) */
+    /**
+     * Thiết lập trọng số điểm cuối kỳ. Giá trị phải trong [0.0, 1.0].
+     *
+     * @param finalWeight giá trị trọng số
+     * @throws IllegalArgumentException nếu finalWeight không thuộc [0.0, 1.0]
+     */
     public void setFinalWeight(double finalWeight) {
+        if (finalWeight < 0.0 || finalWeight > 1.0) {
+            throw new IllegalArgumentException(
+                "finalWeight must be between 0.0 and 1.0");
+        }
         this.finalWeight = finalWeight;
     }
 
-    // ========== Một số phương thức tiện ích ==========
+    // ===== Phương thức tiện ích =====
 
     /**
      * Tính điểm tổng kết (final grade) theo công thức:
      * grade = midtermScore * (1 - finalWeight) + finalScore * finalWeight
      *
-     * @return Điểm tổng kết của học phần
+     * @return Điểm tổng kết; 0.0 nếu chưa nhập đủ điểm
      */
     public double calculateFinalGrade() {
-        return midtermScore * (1.0 - finalWeight) + finalScore * finalWeight;
+        if (midtermScore == null || finalScore == null) {
+            return 0.0;
+        }
+        return midtermScore * (1.0 - finalWeight)
+             + finalScore    * finalWeight;
     }
 
     /**
@@ -152,24 +150,20 @@ public class Course {
 
     @Override
     public String toString() {
-        return "Course{" +
-                "courseID='" + courseID + '\'' +
-                ", courseName='" + courseName + '\'' +
-                ", creditCount=" + creditCount +
-                ", preCourseID='" + preCourseID + '\'' +
-                ", midtermScore=" + midtermScore +
-                ", finalScore=" + finalScore +
-                ", finalWeight=" + finalWeight +
-                '}';
+        return String.format(
+            "%s - %s | Tín chỉ: %d | Tiên quyết: %s | Trọng số CK: %.2f",
+            courseID, courseName,
+            creditCount,
+            (preCourseID == null || preCourseID.isEmpty() ? "Không" : preCourseID),
+            finalWeight
+        );
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Course course = (Course) o;
-        // Chỉ so sánh theo courseID vì nó duy nhất
         return Objects.equals(courseID, course.courseID);
     }
 
@@ -178,4 +172,3 @@ public class Course {
         return Objects.hash(courseID);
     }
 }
-

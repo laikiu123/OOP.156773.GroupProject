@@ -5,11 +5,15 @@ import java.util.List;
 
 /**
  * Đại diện cho chương trình đào tạo của một ngành học.
- * Chứa học phần bắt buộc, tự chọn và các ngưỡng tín chỉ.
+ * Chứa thông tin về loại chương trình (tín chỉ hoặc niên chế),
+ * danh sách học phần bắt buộc, tự chọn và các ngưỡng tín chỉ.
  */
 public class Program {
     /** Tên ngành (ví dụ: "Computer Science"). */
     private String majorName;
+
+    /** Loại chương trình: tín chỉ hoặc niên chế. */
+    private ProgramType type;
 
     /** Danh sách học phần bắt buộc. */
     private List<Course> requiredCourses;
@@ -24,20 +28,23 @@ public class Program {
     private int totalCreditRequirement;
 
     /**
-     * Constructor đầy đủ tham số.
+     * Constructor đầy đủ tham số, bao gồm loại chương trình.
      *
-     * @param majorName                Tên ngành
-     * @param requiredCourses          Danh sách học phần bắt buộc
-     * @param electiveCourses          Danh sách học phần tự chọn
+     * @param majorName                 Tên ngành
+     * @param type                      Loại chương trình (CREDIT_BASED hoặc PART_TIME)
+     * @param requiredCourses           Danh sách học phần bắt buộc
+     * @param electiveCourses           Danh sách học phần tự chọn
      * @param electiveCreditRequirement Ngưỡng tín chỉ tự chọn
-     * @param totalCreditRequirement   Tổng tín chỉ yêu cầu
+     * @param totalCreditRequirement    Tổng tín chỉ yêu cầu
      */
     public Program(String majorName,
+                   ProgramType type,
                    List<Course> requiredCourses,
                    List<Course> electiveCourses,
                    int electiveCreditRequirement,
                    int totalCreditRequirement) {
         this.majorName = majorName;
+        this.type = type;
         this.requiredCourses = requiredCourses;
         this.electiveCourses = electiveCourses;
         this.electiveCreditRequirement = electiveCreditRequirement;
@@ -45,26 +52,87 @@ public class Program {
     }
 
     // ===== Getter / Setter =====
-    public String getMajorName() { return majorName; }
-    public void setMajorName(String majorName) { this.majorName = majorName; }
+    public String getMajorName() {
+        return majorName;
+    }
+    public void setMajorName(String majorName) {
+        this.majorName = majorName;
+    }
 
-    public List<Course> getRequiredCourses() { return requiredCourses; }
-    public void setRequiredCourses(List<Course> requiredCourses) { this.requiredCourses = requiredCourses; }
+    public ProgramType getType() {
+        return type;
+    }
+    public void setType(ProgramType type) {
+        this.type = type;
+    }
 
-    public List<Course> getElectiveCourses() { return electiveCourses; }
-    public void setElectiveCourses(List<Course> electiveCourses) { this.electiveCourses = electiveCourses; }
+    public List<Course> getRequiredCourses() {
+        return requiredCourses;
+    }
+    public void setRequiredCourses(List<Course> requiredCourses) {
+        this.requiredCourses = requiredCourses;
+    }
 
-    public int getElectiveCreditRequirement() { return electiveCreditRequirement; }
-    public void setElectiveCreditRequirement(int electiveCreditRequirement) { this.electiveCreditRequirement = electiveCreditRequirement; }
+    public List<Course> getElectiveCourses() {
+        return electiveCourses;
+    }
+    public void setElectiveCourses(List<Course> electiveCourses) {
+        this.electiveCourses = electiveCourses;
+    }
 
-    public int getTotalCreditRequirement() { return totalCreditRequirement; }
-    public void setTotalCreditRequirement(int totalCreditRequirement) { this.totalCreditRequirement = totalCreditRequirement; }
+    public int getElectiveCreditRequirement() {
+        return electiveCreditRequirement;
+    }
+    public void setElectiveCreditRequirement(int electiveCreditRequirement) {
+        this.electiveCreditRequirement = electiveCreditRequirement;
+    }
+
+    public int getTotalCreditRequirement() {
+        return totalCreditRequirement;
+    }
+    public void setTotalCreditRequirement(int totalCreditRequirement) {
+        this.totalCreditRequirement = totalCreditRequirement;
+    }
+
+    // ===== Utility Methods =====
+
+    /**
+     * Kiểm tra xem Program có chứa học phần (bắt buộc hoặc tự chọn) không.
+     *
+     * @param courseID mã học phần cần kiểm tra
+     * @return true nếu có trong requiredCourses hoặc electiveCourses
+     */
+    public boolean containsCourse(String courseID) {
+        if (courseID == null || courseID.trim().isEmpty()) {
+            return false;
+        }
+        boolean inReq = requiredCourses.stream()
+            .anyMatch(c -> c.getCourseID().equalsIgnoreCase(courseID));
+        if (inReq) return true;
+        return electiveCourses.stream()
+            .anyMatch(c -> c.getCourseID().equalsIgnoreCase(courseID));
+    }
+
+    /**
+     * Kiểm tra xem một học phần có phải khóa học bắt buộc không.
+     */
+    public boolean isRequiredCourse(String courseID) {
+        if (courseID == null || courseID.trim().isEmpty()) return false;
+        return requiredCourses.stream()
+            .anyMatch(c -> c.getCourseID().equalsIgnoreCase(courseID));
+    }
+
+    /**
+     * Kiểm tra xem một học phần có phải khóa học tự chọn không.
+     */
+    public boolean isElectiveCourse(String courseID) {
+        if (courseID == null || courseID.trim().isEmpty()) return false;
+        return electiveCourses.stream()
+            .anyMatch(c -> c.getCourseID().equalsIgnoreCase(courseID));
+    }
 
     /**
      * Kiểm tra xem sinh viên tín chỉ đã hoàn thành tất cả học phần bắt buộc chưa.
-     *
-     * @param student Sinh viên hệ tín chỉ
-     * @return true nếu hoàn thành; false nếu còn thiếu
      */
     public boolean hasCompletedAllRequired(CreditBasedStudent student) {
         for (Course course : requiredCourses) {
@@ -76,10 +144,7 @@ public class Program {
     }
 
     /**
-     * Tính tổng tín chỉ đã hoàn thành từ các học phần tự chọn.
-     *
-     * @param student Sinh viên hệ tín chỉ
-     * @return tổng tín chỉ
+     * Đếm tín chỉ đã hoàn thành trong học phần tự chọn cho sinh viên tín chỉ.
      */
     public int countCompletedElectiveCredits(CreditBasedStudent student) {
         return (int) student.getCompletedEnrollments().stream()
@@ -87,5 +152,18 @@ public class Program {
                 .anyMatch(c -> c.getCourseID().equalsIgnoreCase(e.getCourse().getCourseID())))
             .mapToInt(e -> e.getCourse().getCreditCount())
             .sum();
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "Program[%s, type=%s, required=%s, elective=%s, electiveReq=%d, totalReq=%d]",
+            majorName,
+            type,
+            requiredCourses,
+            electiveCourses,
+            electiveCreditRequirement,
+            totalCreditRequirement
+        );
     }
 }
