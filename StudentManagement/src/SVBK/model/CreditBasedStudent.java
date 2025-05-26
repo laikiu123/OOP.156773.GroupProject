@@ -1,7 +1,6 @@
 // File: SVBK/model/CreditBasedStudent.java
 package SVBK.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,12 +9,6 @@ import java.util.List;
  * rồi tính CPA (trung bình có trọng số theo tín chỉ) trên thang 4.
  */
 public class CreditBasedStudent extends Student {
-    /** Danh sách học phần đã đăng ký. */
-    private List<Course> registeredCourses;
-
-    /** Số tín chỉ đã hoàn thành. */
-    private int completedCredits;
-
     /** Chương trình đào tạo kèm điều kiện tín chỉ. */
     private Program program;
 
@@ -29,31 +22,9 @@ public class CreditBasedStudent extends Student {
     public CreditBasedStudent(String studentID, String studentName, Program program) {
         super(studentID, studentName, "Credit-based");
         this.program = program;
-        this.registeredCourses = new ArrayList<>();
-        this.completedCredits = 0;
     }
 
     // ===== Getter / Setter =====
-
-    /** @return Danh sách học phần đã đăng ký */
-    public List<Course> getRegisteredCourses() {
-        return registeredCourses;
-    }
-
-    /** @param registeredCourses Thiết lập danh sách học phần đã đăng ký */
-    public void setRegisteredCourses(List<Course> registeredCourses) {
-        this.registeredCourses = registeredCourses;
-    }
-
-    /** @return Số tín chỉ đã hoàn thành */
-    public int getCompletedCredits() {
-        return completedCredits;
-    }
-
-    /** @param completedCredits Thiết lập số tín chỉ đã hoàn thành */
-    public void setCompletedCredits(int completedCredits) {
-        this.completedCredits = completedCredits;
-    }
 
     /** @return Chương trình đào tạo */
     public Program getProgram() {
@@ -68,89 +39,87 @@ public class CreditBasedStudent extends Student {
     // ===== Business Methods =====
 
     /**
-     * Kiểm tra prerequisite của học phần.
+     * Kiểm tra điều kiện prerequisite trước khi đăng ký.
+     *
+     * @param course Học phần cần kiểm tra
+     * @return true nếu không có prerequisite hoặc đã hoàn thành prerequisite
      */
     public boolean checkPrerequisites(Course course) {
         String preID = course.getPreCourseID();
-        if (preID == null || preID.trim().isEmpty()) {
-            return true;
-        }
-        return getCompletedCourseIDs().contains(preID);
+        if (preID == null || preID.trim().isEmpty()) return true;
+        // Đã hoàn thành mô đun prerequisite
+        return getCompletedEnrollments().stream()
+            .anyMatch(e -> e.getCourse().getCourseID().equalsIgnoreCase(preID));
     }
 
     /**
-     * Đăng ký học phần nếu đủ điều kiện và chưa đăng ký.
+     * Đăng ký học phần (Enrollment) nếu đủ điều kiện và có trong chương trình.
+     *
+     * @param course Học phần
+     * @return true nếu thêm mới; false nếu không thỏa
      */
     public boolean registerCourse(Course course) {
-        if (course == null || !checkPrerequisites(course)) {
-            return false;
-        }
-        for (Course c : registeredCourses) {
-            if (c.getCourseID().equals(course.getCourseID())) {
-                return false;
-            }
-        }
-        registeredCourses.add(course);
-        return true;
+        // Giáo trình bao gồm required + elective
+        boolean inProgram = program.getRequiredCourses().stream()
+                                .anyMatch(c -> c.getCourseID().equalsIgnoreCase(course.getCourseID()))
+                         || program.getElectiveCourses().stream()
+                                .anyMatch(c -> c.getCourseID().equalsIgnoreCase(course.getCourseID()));
+        if (!inProgram || !checkPrerequisites(course)) return false;
+        return enrollCourse(course);
     }
 
     /**
-     * Hoàn thành khóa học: loại khỏi registeredCourses,
-     * thêm vào completedCourseIDs và cộng completedCredits.
-     */
-    public void completeCourse(Course course) {
-        if (course != null && registeredCourses.remove(course)) {
-            addCompletedCourseID(course.getCourseID());
-            completedCredits += course.getCreditCount();
-        }
-    }
-
-    /**
-     * Chuyển điểm học phần từ thang 10 sang thang 4.
-     *
-     * @param grade10 Điểm học phần thang 10
-     * @return Điểm tương ứng thang 4
-     */
-    private double convert10to4(double grade10) {
-        if (grade10 >= 8.5) return 4.0;
-        if (grade10 >= 7.0) return 3.0;
-        if (grade10 >= 5.5) return 2.0;
-        if (grade10 >= 4.0) return 1.0;
-        return 0.0;
-    }
-
-    /**
-     * Tính CPA: quy đổi từng học phần sang thang 4 rồi tính trung bình có trọng số.
+     * Tính CPA: quy đổi từng học phần đã hoàn thành sang thang 4 rồi tính trung bình có trọng số.
      *
      * @return CPA thang 4
      */
     @Override
     public double calculateFinalGrade() {
+        List<Enrollment> completed = getCompletedEnrollments();
         double totalPoints = 0;
         int totalCredits = 0;
-        for (Course c : registeredCourses) {
-            double grade10 = c.calculateFinalGrade(); // thang 10
-            double grade4 = convert10to4(grade10);
-            totalPoints += grade4 * c.getCreditCount();
-            totalCredits += c.getCreditCount();
+        for (Enrollment e : completed) {
+            double grade10 = e.getCourse().calculateFinalGrade();
+            // quy đổi sang thang 4
+            double grade4;
+            if (grade10 >= 8.5) grade4 = 4.0;
+            else if (grade10 >= 7.0) grade4 = 3.0;
+            else if (grade10 >= 5.5) grade4 = 2.0;
+            else if (grade10 >= 4.0) grade4 = 1.0;
+            else grade4 = 0.0;
+            totalPoints += grade4 * e.getCourse().getCreditCount();
+            totalCredits += e.getCourse().getCreditCount();
         }
         return totalCredits == 0 ? 0.0 : totalPoints / totalCredits;
     }
 
     /**
-     * Kiểm tra điều kiện tốt nghiệp theo Program:
+     * Kiểm tra điều kiện tốt nghiệp:
      * 1) Hoàn thành tất cả requiredCourses
-     * 2) Tích lũy đủ electiveCreditRequirement
-     * 3) completedCredits >= totalCreditRequirement
+     * 2) Tích lũy đủ tín chỉ tự chọn
+     * 3) Tích lũy đủ tổng tín chỉ chương trình
+     *
+     * @return true nếu thỏa
      */
     @Override
     public boolean checkGraduation() {
-        if (!program.hasCompletedAllRequired(this)) {
-            return false;
+        // 1) required
+        for (Course rc : program.getRequiredCourses()) {
+            boolean done = getCompletedEnrollments().stream()
+                .anyMatch(e -> e.getCourse().getCourseID().equalsIgnoreCase(rc.getCourseID()));
+            if (!done) return false;
         }
-        if (program.countCompletedElectiveCredits(this) < program.getElectiveCreditRequirement()) {
-            return false;
-        }
-        return completedCredits >= program.getTotalCreditRequirement();
+        // 2) elective credits
+        int electiveCredits = getCompletedEnrollments().stream()
+            .filter(e -> program.getElectiveCourses().stream()
+                .anyMatch(ec -> ec.getCourseID().equalsIgnoreCase(e.getCourse().getCourseID())))
+            .mapToInt(e -> e.getCourse().getCreditCount())
+            .sum();
+        if (electiveCredits < program.getElectiveCreditRequirement()) return false;
+        // 3) total credits
+        int totalCredits = getCompletedEnrollments().stream()
+            .mapToInt(e -> e.getCourse().getCreditCount())
+            .sum();
+        return totalCredits >= program.getTotalCreditRequirement();
     }
 }

@@ -2,17 +2,16 @@
 package SVBK.manager;
 
 import SVBK.model.Student;
+import SVBK.model.Course;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Lớp StudentManager chịu trách nhiệm quản lý danh sách sinh viên:
- * thêm, xóa, tìm kiếm và sửa thông tin sinh viên.
+ * thêm, xóa, tìm kiếm, sửa thông tin sinh viên, và đăng ký học phần.
  */
 public class StudentManager {
-    /**
-     * Danh sách sinh viên được quản lý.
-     */
+    /** Danh sách sinh viên được quản lý. */
     private List<Student> listStudents;
 
     /**
@@ -20,6 +19,21 @@ public class StudentManager {
      */
     public StudentManager() {
         this.listStudents = new ArrayList<>();
+    }
+
+    /**
+     * Đăng ký học phần cho sinh viên.
+     *
+     * @param studentID Mã sinh viên
+     * @param course    Học phần cần đăng ký
+     * @return true nếu đăng ký thành công; false nếu không tìm thấy SV hoặc khóa đã đăng ký
+     */
+    public boolean enrollCourse(String studentID, Course course) {
+        Student s = findStudent(studentID);
+        if (s == null || course == null) {
+            return false;
+        }
+        return s.enrollCourse(course);
     }
 
     /**
@@ -97,7 +111,7 @@ public class StudentManager {
     /**
      * Lấy danh sách tất cả sinh viên.
      *
-     * @return bản sao List<Student> để tránh chỉnh sửa trực tiếp danh sách nội bộ.
+     * @return bản sao List<Student> tránh sửa trực tiếp.
      */
     public List<Student> getAllStudents() {
         return new ArrayList<>(listStudents);

@@ -8,33 +8,23 @@ import java.util.Objects;
 /**
  * Lớp trừu tượng đại diện cho sinh viên chung (Credit-based hoặc Part-time).
  * Thông tin ngành được lưu trong {@link Program}, không lặp lại ở đây.
+ * Quản lý danh sách Enrollment chứa các học phần đang học và đã hoàn thành.
  */
 public abstract class Student {
-    /**
-     * Mã sinh viên duy nhất (ví dụ: "SV001").
-     */
+    /** Mã sinh viên duy nhất (ví dụ: "SV001"). */
     private String studentID;
-
-    /**
-     * Họ và tên sinh viên (ví dụ: "Nguyễn Văn A").
-     */
+    /** Họ và tên sinh viên (ví dụ: "Nguyễn Văn A"). */
     private String studentName;
-
-    /**
-     * Loại sinh viên: "Credit-based" hoặc "Part-time".
-     */
+    /** Loại sinh viên: "Credit-based" hoặc "Part-time". */
     private String studentType;
+    /** Danh sách Enrollment: các học phần đăng ký, lưu điểm GK, CK. */
+    private List<Enrollment> enrollments;
 
     /**
-     * Danh sách mã học phần đã hoàn thành, dùng để kiểm tra prerequisite và tính tín chỉ.
-     */
-    private List<String> completedCourseIDs;
-
-    /**
-     * Constructor mặc định, khởi tạo danh sách completedCourseIDs.
+     * Constructor mặc định, khởi tạo danh sách enrollments.
      */
     public Student() {
-        this.completedCourseIDs = new ArrayList<>();
+        this.enrollments = new ArrayList<>();
     }
 
     /**
@@ -45,10 +35,10 @@ public abstract class Student {
      * @param studentType Loại sinh viên
      */
     public Student(String studentID, String studentName, String studentType) {
-        this.studentID = studentID;
+        this.studentID   = studentID;
         this.studentName = studentName;
         this.studentType = studentType;
-        this.completedCourseIDs = new ArrayList<>();
+        this.enrollments = new ArrayList<>();
     }
 
     // ===== Getter / Setter =====
@@ -83,45 +73,112 @@ public abstract class Student {
         this.studentType = studentType;
     }
 
-    /** @return Danh sách mã học phần đã hoàn thành */
-    public List<String> getCompletedCourseIDs() {
-        return completedCourseIDs;
+    /** @return Danh sách Enrollment */
+    public List<Enrollment> getEnrollments() {
+        return enrollments;
     }
 
-    /** @param completedCourseIDs Danh sách mã học phần đã hoàn thành */
-    public void setCompletedCourseIDs(List<String> completedCourseIDs) {
-        this.completedCourseIDs = completedCourseIDs;
+    /** @param enrollments Thiết lập danh sách Enrollment */
+    public void setEnrollments(List<Enrollment> enrollments) {
+        this.enrollments = enrollments;
     }
 
-    // ===== Quản lý completedCourseIDs =====
+    // ===== Enrollment management =====
 
     /**
-     * Thêm mã học phần vào danh sách nếu chưa tồn tại.
+     * Đăng ký học phần nếu:
+     *  1) Course != null
+     *  2) Chưa đăng ký/chưa hoàn thành trước đó
+     *  3) Nếu course có prerequisite thì student đã hoàn thành khóa prerequisite
      *
-     * @param courseID Mã học phần
+     * @param course Học phần cần đăng ký
+     * @return true nếu đăng ký thành công; false nếu không hợp lệ
      */
-    public void addCompletedCourseID(String courseID) {
-        if (courseID != null && !courseID.trim().isEmpty() &&
-            !completedCourseIDs.contains(courseID)) {
-            completedCourseIDs.add(courseID);
+    public boolean enrollCourse(Course course) {
+        if (course == null) return false;
+
+        // 1) Kiểm tra đã có Enrollment cho course này chưa (đang học hoặc đã hoàn thành)
+        for (Enrollment e : enrollments) {
+            if (e.getCourse().getCourseID().equalsIgnoreCase(course.getCourseID())) {
+                return false; // đã đăng ký trước đó
+            }
         }
+
+        // 2) Kiểm tra prerequisite (nếu có)
+        if (course.hasPrerequisite()) {
+            String preID = course.getPreCourseID().trim();
+            boolean passed = false;
+            for (Enrollment e : getCompletedEnrollments()) {
+                if (e.getCourse().getCourseID().equalsIgnoreCase(preID)) {
+                    passed = true;
+                    break;
+                }
+            }
+            if (!passed) {
+                return false; // chưa hoàn thành học phần tiên quyết
+            }
+        }
+
+        // 3) Tất cả điều kiện thỏa, tạo Enrollment mới (chưa có điểm)
+        enrollments.add(new Enrollment(course));
+        return true;
     }
 
     /**
-     * Loại bỏ mã học phần khỏi danh sách.
+     * Nhập điểm cho một học phần đã đăng ký.
      *
-     * @param courseID Mã học phần
+     * @param courseID   Mã học phần
+     * @param midterm    Điểm giữa kỳ
+     * @param finalScore Điểm cuối kỳ
+     * @return true nếu cập nhật thành công; false nếu không tìm thấy Enrollment
      */
-    public void removeCompletedCourseID(String courseID) {
-        completedCourseIDs.remove(courseID);
+    public boolean enterGrade(String courseID, double midterm, double finalScore) {
+        for (Enrollment e : enrollments) {
+            if (e.getCourse().getCourseID().equalsIgnoreCase(courseID)) {
+                e.setMidtermScore(midterm);
+                e.setFinalScore(finalScore);
+                return true;
+            }
+        }
+        return false;
     }
 
-    // ===== Phương thức trừu tượng =====
+    /**
+     * Lấy danh sách môn đã hoàn thành.
+     *
+     * @return List of Enrollment đã complete
+     */
+    public List<Enrollment> getCompletedEnrollments() {
+        List<Enrollment> completed = new ArrayList<>();
+        for (Enrollment e : enrollments) {
+            if (e.isCompleted()) {
+                completed.add(e);
+            }
+        }
+        return completed;
+    }
+
+    /**
+     * Lấy danh sách môn đang học (chưa hoàn thành).
+     *
+     * @return List of Enrollment chưa complete
+     */
+    public List<Enrollment> getInProgressEnrollments() {
+        List<Enrollment> inProgress = new ArrayList<>();
+        for (Enrollment e : enrollments) {
+            if (!e.isCompleted()) {
+                inProgress.add(e);
+            }
+        }
+        return inProgress;
+    }
+
+    // ===== Abstract methods =====
 
     /**
      * Tính điểm trung bình (CPA) của sinh viên.
      * - Với Part-time: thang 10
-     * - Với Credit-based: quy đổi về thang 4
+     * - Với Credit-based: quy đổi từng học phần sang thang 4 rồi tính trung bình
      *
      * @return Điểm CPA theo hệ tương ứng
      */
@@ -129,20 +186,17 @@ public abstract class Student {
 
     /**
      * Kiểm tra điều kiện tốt nghiệp của sinh viên.
-     * Logic chi tiết do các lớp con triển khai.
+     * Logic chi tiết do lớp con triển khai.
      *
-     * @return true nếu đủ điều kiện; false nếu chưa
+     * @return true nếu đủ điều kiện
      */
     public abstract boolean checkGraduation();
 
     @Override
     public String toString() {
-        return "Student{" +
-               "studentID='" + studentID + '\'' +
-               ", studentName='" + studentName + '\'' +
-               ", studentType='" + studentType + '\'' +
-               ", completedCourseIDs=" + completedCourseIDs +
-               '}';
+        return String.format("%s - %s [%s]\n  Đang học: %s\n  Đã hoàn thành: %s",
+            studentID, studentName, studentType,
+            getInProgressEnrollments(), getCompletedEnrollments());
     }
 
     @Override

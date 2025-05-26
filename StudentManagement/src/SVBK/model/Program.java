@@ -68,9 +68,9 @@ public class Program {
      */
     public boolean hasCompletedAllRequired(CreditBasedStudent student) {
         for (Course course : requiredCourses) {
-            if (!student.getCompletedCourseIDs().contains(course.getCourseID())) {
-                return false;
-            }
+            boolean done = student.getCompletedEnrollments().stream()
+                .anyMatch(e -> e.getCourse().getCourseID().equalsIgnoreCase(course.getCourseID()));
+            if (!done) return false;
         }
         return true;
     }
@@ -82,12 +82,10 @@ public class Program {
      * @return tổng tín chỉ
      */
     public int countCompletedElectiveCredits(CreditBasedStudent student) {
-        int sum = 0;
-        for (Course course : electiveCourses) {
-            if (student.getCompletedCourseIDs().contains(course.getCourseID())) {
-                sum += course.getCreditCount();
-            }
-        }
-        return sum;
+        return (int) student.getCompletedEnrollments().stream()
+            .filter(e -> electiveCourses.stream()
+                .anyMatch(c -> c.getCourseID().equalsIgnoreCase(e.getCourse().getCourseID())))
+            .mapToInt(e -> e.getCourse().getCreditCount())
+            .sum();
     }
 }

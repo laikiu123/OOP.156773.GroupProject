@@ -1,9 +1,11 @@
+// File: SVBK/service/GraduationValidator.java
 package SVBK.service;
 
 import SVBK.model.Student;
 import SVBK.model.CreditBasedStudent;
 import SVBK.model.PartTimeStudent;
 import SVBK.model.Course;
+import SVBK.model.Enrollment;
 
 import java.util.List;
 
@@ -27,23 +29,17 @@ public class GraduationValidator {
     /**
      * Tính tổng số tín chỉ đã hoàn thành.
      * @param student Đối tượng Student
-     * @return tổng tín chỉ (áp dụng cho CreditBasedStudent và PartTimeStudent)
+     * @return tổng tín chỉ (áp dụng cho mọi loại sinh viên)
      */
     public int calNumCredits(Student student) {
-        if (student instanceof CreditBasedStudent) {
-            return ((CreditBasedStudent) student).getCompletedCredits();
+        if (student == null) {
+            return 0;
         }
-        if (student instanceof PartTimeStudent) {
-            int sum = 0;
-            List<Course> req = ((PartTimeStudent) student).getProgram().getRequiredCourses();
-            for (Course c : req) {
-                if (student.getCompletedCourseIDs().contains(c.getCourseID())) {
-                    sum += c.getCreditCount();
-                }
-            }
-            return sum;
+        int sum = 0;
+        for (Enrollment e : student.getCompletedEnrollments()) {
+            sum += e.getCourse().getCreditCount();
         }
-        return 0;
+        return sum;
     }
 
     /**

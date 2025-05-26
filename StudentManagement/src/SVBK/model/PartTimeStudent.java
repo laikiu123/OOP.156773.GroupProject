@@ -2,9 +2,11 @@
 package SVBK.model;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Sinh viên hệ niên chế (Part-time), tính CPA thang 10.
+ * Sử dụng enrollments từ lớp cha để quản lý đăng ký môn và điểm.
  */
 public class PartTimeStudent extends Student {
     /** Chương trình đào tạo gồm các học phần cố định. */
@@ -12,6 +14,10 @@ public class PartTimeStudent extends Student {
 
     /**
      * Constructor khởi tạo sinh viên hệ niên chế.
+     *
+     * @param studentID   Mã sinh viên
+     * @param studentName Tên sinh viên
+     * @param program     Chương trình đào tạo
      */
     public PartTimeStudent(String studentID, String studentName, Program program) {
         super(studentID, studentName, "Part-time");
@@ -22,25 +28,50 @@ public class PartTimeStudent extends Student {
     public Program getProgram() { return program; }
     public void setProgram(Program program) { this.program = program; }
 
+    // ===== Business Methods =====
+
     /**
-     * Tính điểm trung bình dựa trên thang 10 của các requiredCourses.
-     * @return CPA thang 10
+     * Đăng ký học phần giống CreditBasedStudent dành cho admin sử dụng.
+     * Chỉ cho phép các học phần thuộc program.
+     *
+     * @param course Học phần cần đăng ký
+     * @return true nếu đăng ký thành công; false nếu không thỏa
      */
-    @Override
-    public double calculateFinalGrade() {
-        List<Course> list = program.getRequiredCourses();
-        if (list.isEmpty()) {
-            return 0.0;
-        }
-        double sum = 0;
-        for (Course c : list) {
-            sum += c.calculateFinalGrade();
-        }
-        return sum / list.size();
+    public boolean registerCourse(Course course) {
+        if (course == null) return false;
+        // Kiểm tra course có trong chương trình
+        boolean inProgram = program.getRequiredCourses().stream()
+            .anyMatch(c -> c.getCourseID().equalsIgnoreCase(course.getCourseID()));
+        if (!inProgram) return false;
+        return enrollCourse(course);
     }
 
     /**
-     * Kiểm tra tốt nghiệp:
+     * Tính điểm trung bình (CPA) theo thang 10 dựa trên các Enrollment đã hoàn thành
+     * cho những Course nằm trong requiredCourses.
+     *
+     * @return CPA thang 10 hoặc 0.0 nếu chưa có kết quả
+     */
+    @Override
+    public double calculateFinalGrade() {
+        List<Course> required = program.getRequiredCourses();
+        List<Enrollment> completed = getCompletedEnrollments();
+        double sum = 0;
+        int count = 0;
+        for (Course c : required) {
+            for (Enrollment e : completed) {
+                if (e.getCourse().getCourseID().equalsIgnoreCase(c.getCourseID())) {
+                    sum += e.calculateFinalGrade();
+                    count++;
+                    break;
+                }
+            }
+        }
+        return count == 0 ? 0.0 : sum / count;
+    }
+
+    /**
+     * Kiểm tra điều kiện tốt nghiệp:
      * - Hoàn thành tất cả requiredCourses
      * - CPA thang 10 >= 5.0
      *
@@ -48,11 +79,13 @@ public class PartTimeStudent extends Student {
      */
     @Override
     public boolean checkGraduation() {
+        // 1) required
         for (Course c : program.getRequiredCourses()) {
-            if (!getCompletedCourseIDs().contains(c.getCourseID())) {
-                return false;
-            }
+            boolean done = getCompletedEnrollments().stream()
+                .anyMatch(e -> e.getCourse().getCourseID().equalsIgnoreCase(c.getCourseID()));
+            if (!done) return false;
         }
+        // 2) CPA thang 10
         return calculateFinalGrade() >= 5.0;
     }
 }
