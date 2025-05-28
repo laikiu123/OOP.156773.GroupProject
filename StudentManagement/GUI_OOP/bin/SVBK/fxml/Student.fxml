@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="450" prefWidth="650" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="Controller.StudentController">
+    <children>
+        <VBox spacing="15" AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
+            <padding>
+                <Insets top="10" right="15" bottom="10" left="15" />
+            </padding>
+
+            <!-- Form nhập thông tin sinh viên -->
+            <GridPane hgap="15" vgap="12">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="30" />
+                    <ColumnConstraints percentWidth="70" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="30" />
+                    <RowConstraints minHeight="30" />
+                    <RowConstraints minHeight="30" />
+                    <RowConstraints minHeight="30" />
+                </rowConstraints>
+
+                <children>
+                    <Label text="Mã sinh viên:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <TextField fx:id="txtStudentID" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                    <Label text="Tên sinh viên:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <TextField fx:id="txtStudentName" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                    <Label text="Loại sinh viên:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                    <ComboBox fx:id="comboProgramType" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                    <Label text="Chương trình học:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                    <ComboBox fx:id="comboMajorName" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                </children>
+            </GridPane>
+
+            <!-- Nút thao tác -->
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <children>
+                    <Button fx:id="btnAddStudent" text="Thêm" prefWidth="80" />
+                    <Button fx:id="btnRemoveStudent" text="Xóa" prefWidth="80" />
+                    <Button fx:id="btnFindStudent" text="Tìm" prefWidth="80" />
+                    <Button fx:id="btnEditStudent" text="Sửa" prefWidth="80" />
+                    <Button fx:id="btnLoadAllStudents" text="Danh sách sinh viên" prefWidth="150" />
+                </children>
+            </HBox>
+
+            <!-- ListView hiển thị danh sách sinh viên -->
+            <ListView fx:id="listViewStudents" prefHeight="250" />
+
+            <!-- Nút quay lại menu chính -->
+            <Button fx:id="btnBackToMenu" text="Quay lại" maxWidth="Infinity" />
+        </VBox>
+    </children>
+</AnchorPane>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="10" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.CourseController">
+    <padding>
+        <Insets bottom="15" left="15" right="15" top="15" />
+    </padding>
+   <children>
+   
+       <!-- Tiêu đề -->
+       <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Quản lý học phần" />
+   
+       <!-- Form nhập học phần -->
+       <GridPane hgap="10" vgap="10">
+      <children>
+              <Label text="Mã học phần:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+              <TextField fx:id="txtCourseID" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+      
+              <Label text="Tên học phần:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+              <TextField fx:id="txtCourseName" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      
+              <Label text="Số tín chỉ:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+              <TextField fx:id="txtCredits" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      
+              <Label text="Học phần tiên quyết:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+              <TextField fx:id="txtPrerequisite" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      </children>
+         <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
+       </GridPane>
+   
+       <!-- Các nút thao tác -->
+       <HBox spacing="10">
+      <children>
+              <Button fx:id="btnAdd" text="Thêm" />
+              <Button fx:id="btnDelete" text="Xóa" />
+              <Button fx:id="btnFind" text="Tìm" />
+              <Button fx:id="btnEdit" text="Sửa" />
+              <Button fx:id="btnList" text="Danh sách" />
+              <Button fx:id="btnBack" text="Quay lại" />
+      </children>
+       </HBox>
+   
+       <!-- ListView hiển thị danh sách học phần -->
+       <ListView fx:id="listCourses" prefHeight="200" />
+   
+       <!-- Label thông báo -->
+       <Label fx:id="lblMessage" style="-fx-text-fill: red;" />
+   </children>
+
+</VBox>
