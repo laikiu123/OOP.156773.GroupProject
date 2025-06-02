@@ -1,0 +1,83 @@
+// File: SVBK/service/GraduationValidator.java
+package Logic;
+
+import model.Student;
+import model.CreditBasedStudent;
+import model.PartTimeStudent;
+import model.Course;
+import model.Enrollment;
+
+import java.util.List;
+
+/**
+ * Kiểm tra điều kiện tốt nghiệp và phân loại học lực của sinh viên.
+ */
+public class GraduationValidator {
+    /**
+     * Kiểm tra xem sinh viên đã đủ điều kiện tốt nghiệp chưa.
+     *
+     * @param student Đối tượng Student
+     * @return true nếu đủ điều kiện; false nếu chưa
+     */
+    public boolean checkGraduation(Student student) {
+        if (student == null) {
+            return false;
+        }
+        return student.checkGraduation();
+    }
+
+    /**
+     * Tính tổng số tín chỉ đã hoàn thành.
+     * @param student Đối tượng Student
+     * @return tổng tín chỉ (áp dụng cho mọi loại sinh viên)
+     */
+    public int calNumCredits(Student student) {
+        if (student == null) {
+            return 0;
+        }
+        int sum = 0;
+        // Đếm tín chỉ chỉ khi Enrollment.isPassed() == true
+        for (Enrollment e : student.getEnrollments()) {
+            if (e.isPassed()) {
+                sum += e.getCourse().getCreditCount();
+            }
+        }
+        return sum;
+    }
+
+    /**
+     * Phân loại học lực:
+     * - PartTimeStudent (thang 10):
+     *   [9.0–10]: Xuất sắc; [8.0–<9.0]: Giỏi; [7.0–<8.0]: Khá;
+     *   [5.0–<7.0]: Trung bình; [4.0–<5.0]: Yếu; <4.0: Kém.
+     * - CreditBasedStudent (thang 4):
+     *   [3.6–4.0]: Xuất sắc; [3.2–<3.6]: Giỏi; [2.5–<3.2]: Khá;
+     *   [2.0–<2.5]: Trung bình; [1.0–<2.0]: Yếu; <1.0: Kém.
+     *
+     * @param student Đối tượng Student
+     * @return Xếp loại học lực
+     */
+    public String typeGraduation(Student student) {
+        if (!checkGraduation(student)) {
+            return "Not graduated";
+        }
+        if (student instanceof PartTimeStudent) {
+            double cpa = student.calculateFinalGrade(); // 10-scale
+            if (cpa >= 9.0) return "Xuất sắc";
+            if (cpa >= 8.0) return "Giỏi";
+            if (cpa >= 7.0) return "Khá";
+            if (cpa >= 5.0) return "Trung bình";
+            if (cpa >= 4.0) return "Yếu";
+            return "Kém";
+        } else if (student instanceof CreditBasedStudent) {
+            double cpa4 = student.calculateFinalGrade(); // 4-scale
+            if (cpa4 >= 3.6) return "Xuất sắc";
+            if (cpa4 >= 3.2) return "Giỏi";
+            if (cpa4 >= 2.5) return "Khá";
+            if (cpa4 >= 2.0) return "Trung bình";
+            if (cpa4 >= 1.0) return "Yếu";
+            return "Kém";
+        }
+        return "Unknown";
+    }
+}
