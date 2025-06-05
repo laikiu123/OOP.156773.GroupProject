@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="15.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.CourseManagementController">
+    <padding>
+        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+    </padding>
+
+    <Label text="Quản lý Học phần" style="-fx-font-size: 20px; -fx-font-weight: bold;">
+        <VBox.margin>
+            <Insets bottom="10.0" />
+        </VBox.margin>
+    </Label>
+
+    <GridPane hgap="10.0" vgap="10.0">
+        <columnConstraints>
+            <ColumnConstraints hgrow="NEVER" minWidth="130.0" prefWidth="140.0" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+        <children>
+            <Label text="Mã học phần:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <TextField fx:id="txtCourseID" promptText="Ví dụ: CS101" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+            <Label text="Tên học phần:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <TextField fx:id="txtCourseName" promptText="Ví dụ: Nhập môn Lập trình" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+            <Label text="Số tín chỉ:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <TextField fx:id="txtCredits" promptText="Ví dụ: 3" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+            <Label text="HP tiên quyết (Mã HP):" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <TextField fx:id="txtPrerequisite" promptText="Để trống nếu không có" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+            <Label text="Trọng số CK (0.0-1.0):" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+            <TextField fx:id="txtFinalWeight" promptText="Ví dụ: 0.7" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+        </children>
+    </GridPane>
+
+    <HBox alignment="CENTER_LEFT" spacing="10.0">
+        <VBox.margin>
+            <Insets top="10.0" />
+        </VBox.margin>
+        <Button fx:id="btnClearForm" mnemonicParsing="false" prefWidth="100.0" text="Nhập mới" /> 
+        <Button fx:id="btnAdd" mnemonicParsing="false" prefWidth="80.0" text="Thêm" />
+        <Button fx:id="btnEdit" mnemonicParsing="false" prefWidth="80.0" text="Sửa" />
+        <Button fx:id="btnDelete" mnemonicParsing="false" prefWidth="80.0" text="Xóa" />
+        <Button fx:id="btnFind" mnemonicParsing="false" prefWidth="80.0" text="Tìm" />
+        <Button fx:id="btnList" mnemonicParsing="false" text="DS Chi tiết" />
+    </HBox>
+    
+    <Label text="Danh sách học phần hiện có:" style="-fx-font-weight: bold;">
+        <VBox.margin>
+            <Insets top="10.0" />
+        </VBox.margin>
+    </Label>
+    <ListView fx:id="listCourses" prefHeight="200.0" VBox.vgrow="ALWAYS" />
+
+    <Label fx:id="lblMessage" style="-fx-text-fill: #D32F2F;" wrapText="true"> 
+      <font>
+         <Font name="System Italic" size="13.0" />
+      </font>
+      <VBox.margin>
+         <Insets top="5.0" />
+      </VBox.margin>
+    </Label>
+    
+    <HBox alignment="BOTTOM_RIGHT" spacing="10.0" VBox.vgrow="NEVER">
+         <VBox.margin>
+            <Insets top="10.0" />
+         </VBox.margin>
+        <Button fx:id="btnBack" mnemonicParsing="false" prefWidth="100.0" text="Quay lại" />
+    </HBox>
+
+</VBox>
