@@ -1,4 +1,4 @@
-package SVBK.controller;
+package Controller;
 
 import SVBK.manager.CourseManager;
 import SVBK.manager.ProgramManager;

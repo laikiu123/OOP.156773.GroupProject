@@ -1,4 +1,4 @@
-package SVBK.controller;
+package Controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader; // Cần cho việc quay lại MainMenu (nếu muốn load lại scene)
