@@ -5,7 +5,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
-import SVBK.controller.MainMenuController;
 import SVBK.manager.*;
 import SVBK.model.*;
 import SVBK.service.*;
@@ -14,6 +13,8 @@ import SVBK.utils.SampleDataGenerator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import Controller.MainMenuController;
 
 public class MainApp extends Application {
 
