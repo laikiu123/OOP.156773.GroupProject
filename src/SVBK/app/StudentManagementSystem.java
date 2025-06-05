@@ -82,6 +82,7 @@ public class StudentManagementSystem {
      * Menu chính với các chức năng: sinh viên, chương trình, học phần, nhập điểm, tốt nghiệp.
      */
     public void mainMenu() {
+    	
         while (true) {
             System.out.println("=== Student Management System by SVBK ===");
             System.out.println("1. Quản lý sinh viên");
