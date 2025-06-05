@@ -12,17 +12,11 @@ Thuộc tính:
 	
 	preCourseID: String
 
-	midtermScore: double
-
-	finalScore: double
-
 	finalWeight: double
 
 Phương thức:
 
 	hasPrerequisite(): boolean
-
-	Getter/Setter các trường
 
 	toString(): String
 
@@ -69,7 +63,7 @@ Thuộc tính:
 
 	studentType: String
 
-	completedCourseIDs: List<String>
+	enrollments : List<Enrollment>
 
 Phương thức trừu tượng:
 
@@ -238,7 +232,7 @@ Quan hệ:
 
 	Aggregation với Course
 
-	Dependency/Composition với ProgramManager để cascade xóa/cập nhật
+	Association với ProgramManager để cascade xóa/cập nhật
 
 
 3. Package SVBK.service
@@ -309,7 +303,7 @@ Inheritance:
 Student
   ├─ CreditBasedStudent
   └─ PartTimeStudent
-
+//Association
 Aggregation/Composition:
 	Program <>── Course
 	StudentManager <>── Student
@@ -317,9 +311,9 @@ Aggregation/Composition:
 	CourseManager <>── Course
 	CreditBasedStudent <>── Program
 	PartTimeStudent <>── Program
-	CourseManager ──▶ ProgramManager
-	Enrollment <>── Course  
-	Student <>── Enrollment  
+	CourseManager ──> ProgramManager
+	Enrollment ──> Course  
+	Student <+>── Enrollment  
 
 Dependency:
 	GradingSystem --> Student, Course  
