@@ -11,6 +11,7 @@
             <entry path="null"/>
         </endorsedDirs>
     </libraryInfo>
+    <libraryInfo home="C:\Program Files\Java\jdk-24" version="24.0.1"/>
     <libraryInfo home="C:\Program Files\Java\jdk1.8.0_202" version="1.8.0_202">
         <bootpath>
             <entry path="C:\Program Files\Java\jdk1.8.0_202\jre\lib\resources.jar"/>
@@ -31,4 +32,16 @@
         </endorsedDirs>
     </libraryInfo>
     <libraryInfo home="C:\Users\Dell\.p2\pool\plugins\org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_23.0.2.v20250131-0604\jre" version="23.0.2"/>
+    <libraryInfo home="C:\Users\trong\Downloads\eclipse-java-2024-12-R-win32-x86_64\eclipse\plugins\org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.5.v20241023-1957\jre" version="21.0.5"/>
+    <libraryInfo home="C:\Users\trong\Downloads\eclipse-java-2024-12-R-win32-x86_64\eclipse\plugins\org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.5.v20241023-1957" version="21.0.5">
+        <bootpath>
+            <entry path="null"/>
+        </bootpath>
+        <extensionDirs>
+            <entry path="null"/>
+        </extensionDirs>
+        <endorsedDirs>
+            <entry path="null"/>
+        </endorsedDirs>
+    </libraryInfo>
 </libraryInfos>
