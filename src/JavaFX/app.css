@@ -1,0 +1,82 @@
+/* ---------- Page & Card (re-useable) ---------- */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 18 18 18 18;
+    -fx-effect: dropshadow(gaussian, rgba(16,24,40,0.10), 16, 0.22, 0, 4);
+}
+
+.header {
+    -fx-font-size: 22px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f172a;
+}
+
+.subheader {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b7280;
+}
+
+.section-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #334155;
+    -fx-padding: 0 0 4 0;
+}
+
+.label-strong {
+    -fx-font-weight: 700;
+}
+
+/* ---------- Inputs ---------- */
+.text-field, .combo-box-base {
+    -fx-min-height: 36;
+}
+
+.elevated-list {
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-padding: 6;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+}
+
+/* ---------- Buttons (re-use from menu) ---------- */
+.btn {
+    -fx-background-radius: 10;
+    -fx-padding: 8 14 8 14;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.btn-primary {
+    -fx-background-color: #1877F2;
+    -fx-text-fill: white;
+}
+.btn-primary:hover { -fx-background-color: derive(#1877F2, -8%); }
+
+.btn-secondary {
+    -fx-background-color: #475569;
+    -fx-text-fill: white;
+}
+.btn-secondary:hover { -fx-background-color: derive(#475569, -8%); }
+
+.btn-danger {
+    -fx-background-color: #dc2626;
+    -fx-text-fill: white;
+}
+.btn-danger:hover { -fx-background-color: derive(#dc2626, -8%); }
+
+.btn-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: #cbd5e1;
+    -fx-text-fill: #0f172a;
+}
+.btn-outline:hover {
+    -fx-background-color: #f8fafc;
+}
+.root { -fx-background-color: #f5f7fb; -fx-font-size: 14px; }
+.table-view .column-header-background { -fx-background-color: #e3eefc; }
+.table-view .column-header .label { -fx-font-weight: bold; }
+.button { -fx-background-radius: 8; }

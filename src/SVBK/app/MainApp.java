@@ -45,7 +45,9 @@ public class MainApp extends Application {
             staticStudentManager = this.studentManager;
             staticGradingSystem = this.gradingSystem;
             staticGraduationValidator = this.graduationValidator;
-
+            
+            primaryStage.setMaximized(true);
+            
             // 2. Tạo và thêm tất cả Courses từ SampleDataGenerator
             // This list is still needed for student enrollment examples later
             List<Course> allCourses = SampleDataGenerator.createCoursesOnly();
@@ -144,6 +146,7 @@ public class MainApp extends Application {
             alert.setHeaderText("Không thể khởi chạy ứng dụng.");
             alert.setContentText("Đã có lỗi xảy ra trong quá trình khởi tạo: " + e.getMessage());
             alert.showAndWait();
+            
         }
     }
 

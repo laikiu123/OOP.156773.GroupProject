@@ -244,21 +244,48 @@ public class GradingController {
     }
 
     @FXML
-    public void handleBackToMainMenu() {
+    private void handleBackToMainMenu(javafx.event.ActionEvent e) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/JavaFX/MainMenu.fxml")); 
-            Parent root = loader.load();
-            Stage stage = (Stage) btnBackToMainMenu.getScene().getWindow(); 
-            
-            System.out.println("GradingController: Quay lại MainMenu.");
-            stage.setScene(new Scene(root));
-            stage.setTitle("Menu Chính"); 
+            javafx.fxml.FXMLLoader loader =
+                    new javafx.fxml.FXMLLoader(getClass().getResource("/JavaFX/MainMenu.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            // Truyền lại managers để MainMenu tiếp tục dùng phiên hiện tại
+            MainMenuController main = loader.getController();
+            if (main != null) {
+                // GradingController đang giữ 2 cái này (được set qua initData(...) trước đó)
+                main.initManagers(
+                    null,               // ProgramManager (không có ở màn này)
+                    courseManager,      // CourseManager
+                    studentManager,     // StudentManager
+                    null,               // GradingSystem (không cần ở menu)
+                    null                // GraduationValidator (không cần ở menu)
+                );
+            }
+
+            javafx.stage.Stage stage =
+                    (javafx.stage.Stage) ((javafx.scene.Node) e.getSource()).getScene().getWindow();
+
+            // GIỮ kích thước/trạng thái hiện tại: ưu tiên thay root nếu Scene đã tồn tại
+            if (stage.getScene() == null) {
+                stage.setScene(new javafx.scene.Scene(root));
+            } else {
+                stage.getScene().setRoot(root);
+            }
+
+            // đảm bảo vẫn full screen / maximize (tùy bạn bật cái nào ở MainApp)
+            if (stage.isFullScreen()) stage.setFullScreen(true);
+            else stage.setMaximized(true);
+
+            stage.setTitle("SSMS - Main Menu");
             stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Lỗi khi quay lại Menu Chính: " + e.getMessage());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showError("Lỗi khi quay lại Menu Chính: " + ex.getMessage());
         }
     }
+
 
     private void showError(String message) {
         if (lblStatus != null) {

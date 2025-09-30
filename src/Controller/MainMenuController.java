@@ -32,6 +32,7 @@ public class MainMenuController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+    	ensureManagersInitialized();
         System.out.println("MainMenuController: initialize() được gọi.");
         // Cố gắng khởi tạo managers nếu chúng chưa được thiết lập (ví dụ, khi MainMenu là scene đầu tiên)
         // hoặc nếu chúng được truyền từ một controller trước đó (ví dụ, LoginController)
@@ -60,29 +61,58 @@ public class MainMenuController implements Initializable {
      * Phương thức này được dùng để MainApp (hoặc một controller khác)
      * truyền các instance manager vào MainMenuController.
      */
-    public void initManagers(ProgramManager pm, CourseManager cm, StudentManager sm,
-                             GradingSystem gs, GraduationValidator gv) {
-        this.programManager = pm;
-        this.courseManager = cm;
-        this.studentManager = sm;
-        this.gradingSystem = gs;
-        this.graduationValidator = gv;
-        System.out.println("MainMenuController: Phương thức initManagers ĐÃ ĐƯỢC GỌI. Các manager đã được thiết lập.");
-
-        // Log chi tiết trạng thái các manager nhận được để dễ debug
-        String pmStatus = (pm == null) ? "NULL" : "OK" + (pm.getAllPrograms() != null ? ", " + pm.getAllPrograms().size() + " programs" : ", programs list is null");
-        String cmStatus = (cm == null) ? "NULL" : "OK" + (cm.getAllCourses() != null ? ", " + cm.getAllCourses().size() + " courses" : ", courses list is null");
-        String smStatus = (sm == null) ? "NULL" : "OK" + (sm.getAllStudents() != null ? ", " + sm.getAllStudents().size() + " students" : ", students list is null");
-
-        System.out.println("  programManager is " + pmStatus);
-        System.out.println("  courseManager is " + cmStatus);
-        System.out.println("  studentManager is " + smStatus);
-        System.out.println("  gradingSystem is " + (gs == null ? "NULL" : "OK"));
-        System.out.println("  graduationValidator is " + (gv == null ? "NULL" : "OK"));
+    private void ensureManagersInitialized() {
+        if (this.programManager == null)       this.programManager = MainApp.getStaticProgramManager();
+        if (this.courseManager == null)        this.courseManager  = MainApp.getStaticCourseManager();
+        if (this.studentManager == null)       this.studentManager = MainApp.getStaticStudentManager();
+        if (this.gradingSystem == null)        this.gradingSystem  = MainApp.getStaticGradingSystem();
+        if (this.graduationValidator == null)  this.graduationValidator = MainApp.getStaticGraduationValidator();
     }
+
+    public void initManagers(ProgramManager pm, CourseManager cm, StudentManager sm,
+            GradingSystem gs, GraduationValidator gv) {
+		// CHỈ gán khi tham số KHÔNG null để tránh overwrite state đang có
+		if (pm != null) this.programManager = pm;
+		if (cm != null) this.courseManager = cm;
+		if (sm != null) this.studentManager = sm;
+		if (gs != null) this.gradingSystem = gs;
+		if (gv != null) this.graduationValidator = gv;
+		
+		System.out.println("MainMenuController.initManagers(): merged non-null managers.");
+		
+		// Log an toàn, không dereference khi null
+		String pmStatus = (this.programManager == null) ? "NULL"
+		: "OK" + ((this.programManager.getAllPrograms() != null)
+		   ? (", " + this.programManager.getAllPrograms().size() + " programs")
+		   : ", programs list is null");
+		
+		String cmStatus = (this.courseManager == null) ? "NULL"
+		: "OK" + ((this.courseManager.getAllCourses() != null)
+		   ? (", " + this.courseManager.getAllCourses().size() + " courses")
+		   : ", courses list is null");
+		
+		String smStatus = (this.studentManager == null) ? "NULL"
+		: "OK" + ((this.studentManager.getAllStudents() != null)
+		   ? (", " + this.studentManager.getAllStudents().size() + " students")
+		   : ", students list is null");
+		
+		System.out.println("  programManager is " + pmStatus);
+		System.out.println("  courseManager is " + cmStatus);
+		System.out.println("  studentManager is " + smStatus);
+		System.out.println("  gradingSystem is " + (this.gradingSystem == null ? "NULL" : "OK"));
+		System.out.println("  graduationValidator is " + (this.graduationValidator == null ? "NULL" : "OK"));
+}
+
 
     @FXML
     void handleStudentManagement(ActionEvent event) {
+    	ensureManagersInitialized(); // <<< thêm dòng này
+        if (this.programManager == null || this.studentManager == null 
+            || this.courseManager == null || this.gradingSystem == null) {
+            showErrorAlert("Lỗi Manager", "Một số Manager cần thiết cho Quản lý Sinh viên chưa được khởi tạo.");
+            return;
+        }
+    	
         if (this.programManager == null || this.studentManager == null || this.courseManager == null || this.gradingSystem == null) {
             showErrorAlert("Lỗi Manager", "Một số Manager cần thiết cho Quản lý Sinh viên chưa được khởi tạo.");
             System.err.println("MainMenuController.handleStudentManagement: Một hoặc nhiều manager là null.");
@@ -103,6 +133,12 @@ public class MainMenuController implements Initializable {
 
     @FXML
     void handleProgramManagement(ActionEvent event) {
+    	ensureManagersInitialized(); // <<< thêm dòng này
+        if (this.programManager == null || this.studentManager == null 
+            || this.courseManager == null || this.gradingSystem == null) {
+            showErrorAlert("Lỗi Manager", "Một số Manager cần thiết cho Quản lý Sinh viên chưa được khởi tạo.");
+            return;
+        }
         if (this.programManager == null || this.courseManager == null) {
             showErrorAlert("Lỗi Manager", "ProgramManager hoặc CourseManager chưa được khởi tạo.");
             System.err.println("MainMenuController.handleProgramManagement: ProgramManager hoặc CourseManager là null.");
@@ -123,6 +159,12 @@ public class MainMenuController implements Initializable {
 
     @FXML
     void handleCourseManagement(ActionEvent event) {
+    	ensureManagersInitialized(); // <<< thêm dòng này
+        if (this.programManager == null || this.studentManager == null 
+            || this.courseManager == null || this.gradingSystem == null) {
+            showErrorAlert("Lỗi Manager", "Một số Manager cần thiết cho Quản lý Sinh viên chưa được khởi tạo.");
+            return;
+        }
          if (this.courseManager == null) {
             showErrorAlert("Lỗi Manager", "CourseManager chưa được khởi tạo.");
             System.err.println("MainMenuController.handleCourseManagement: courseManager là null.");
@@ -143,6 +185,12 @@ public class MainMenuController implements Initializable {
 
     @FXML
     void handleGrading(ActionEvent event) {
+    	ensureManagersInitialized(); // <<< thêm dòng này
+        if (this.programManager == null || this.studentManager == null 
+            || this.courseManager == null || this.gradingSystem == null) {
+            showErrorAlert("Lỗi Manager", "Một số Manager cần thiết cho Quản lý Sinh viên chưa được khởi tạo.");
+            return;
+        }
         // GradingController cần StudentManager và CourseManager
         if (this.studentManager == null || this.courseManager == null) {
              showErrorAlert("Lỗi Manager", "StudentManager hoặc CourseManager cần cho Nhập điểm chưa được khởi tạo.");
@@ -202,13 +250,28 @@ public class MainMenuController implements Initializable {
     }
 
     private void showScene(ActionEvent event, Parent root, String title) {
-        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        // Lấy Stage hiện tại
+        Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
         stage.setTitle(title);
-        stage.setScene(new Scene(root));
-        // Cân nhắc việc setResizable(true) hoặc false tùy theo thiết kế của bạn cho từng màn hình
-        // stage.setResizable(false); 
+
+        if (stage.getScene() == null) {
+            // Lần đầu: chưa có Scene -> tạo Scene
+            stage.setScene(new Scene(root));
+        } else {
+            // Các lần sau: chỉ thay root để GIỮ kích thước/ trạng thái hiện tại
+            stage.getScene().setRoot(root);
+        }
+
+        // Giữ full screen / maximize cho mỗi lần chuyển màn
+        if (stage.isFullScreen()) {
+            stage.setFullScreen(true);     // Nếu app đang dùng full-screen thực sự
+        } else {
+            stage.setMaximized(true);      // Nếu chỉ dùng maximize
+        }
+
         stage.show();
     }
+
 
     private void showErrorAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

@@ -7,12 +7,14 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+
 
 <AnchorPane prefHeight="700.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.StudentManagementController">
    <children>
@@ -60,14 +62,22 @@
                   </HBox>
                   <HBox alignment="CENTER_LEFT" spacing="10.0">
                      <children>
-                        <Button fx:id="btnLoadAll" mnemonicParsing="false" text="Tải lại DS Sinh viên" />
+                       <Button fx:id="btnLoadAll"
+        mnemonicParsing="false"
+        text="Tải lại DS Sinh viên"
+        onAction="#handleClearFormOnly"/>
+
                      </children>
                      <VBox.margin>
                         <Insets top="5.0" bottom="10.0"/>
                      </VBox.margin>
                   </HBox>
                   <Label text="Danh sách Sinh viên:" style="-fx-font-weight: bold;" />
-                  <ListView fx:id="listViewStudents" VBox.vgrow="ALWAYS" />
+                  <ListView fx:id="listViewStudents" VBox.vgrow="ALWAYS">
+                     <placeholder>
+                        <Label text="Chưa có sinh viên nào. Hãy thêm hoặc tải lại danh sách." />
+                     </placeholder>
+                  </ListView>
                </children>
             </VBox>
             
@@ -107,7 +117,11 @@
                   <HBox spacing="10.0" alignment="CENTER_LEFT">
                      <children>
                         <Label text="Mã HP:" />
-                        <TextField fx:id="txtCourseToEnroll" promptText="Nhập Mã HP" HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="txtCourseToEnroll" promptText="Nhập Mã HP" HBox.hgrow="ALWAYS">
+                           <tooltip>
+                             <Tooltip text="Gõ từng ký tự để hiện gợi ý mã học phần (ví dụ: I, IT, IT3...)" />
+                           </tooltip>
+                        </TextField>
                         <Button fx:id="btnEnrollCourse" mnemonicParsing="false" text="Đăng ký HP" /> 
                      </children>
                      <VBox.margin>
@@ -122,12 +136,21 @@
                     </columnConstraints>
                     <rowConstraints>
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-                      <RowConstraints minHeight="10.0" vgrow="ALWAYS" />  </rowConstraints>
+                      <RowConstraints minHeight="10.0" vgrow="ALWAYS" />  
+                    </rowConstraints>
                      <children>
                         <Label text="Các môn đang học:" style="-fx-font-weight: bold;" />
-                        <ListView fx:id="listInProgressEnrollments" GridPane.rowIndex="1" />
+                        <ListView fx:id="listInProgressEnrollments" GridPane.rowIndex="1">
+                           <placeholder>
+                              <Label text="Chưa có môn nào đang học." />
+                           </placeholder>
+                        </ListView>
                         <Label text="Các môn đã hoàn thành:" style="-fx-font-weight: bold;" GridPane.columnIndex="1" />
-                        <ListView fx:id="listCompletedEnrollments" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <ListView fx:id="listCompletedEnrollments" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <placeholder>
+                              <Label text="Chưa có môn nào đã hoàn thành." />
+                           </placeholder>
+                        </ListView>
                      </children>
                   </GridPane>
 
@@ -135,7 +158,7 @@
                       <VBox.margin>
                           <Insets top="20.0" />
                       </VBox.margin>
-                      <Button fx:id="btnBackToMenu" mnemonicParsing="false" text="Quay lại Menu Chính" />
+                      <Button fx:id="btnBackToMenu" text="Quay lại Menu Chính" onAction="#backToMain" />
                   </HBox>
                </children>
             </VBox>

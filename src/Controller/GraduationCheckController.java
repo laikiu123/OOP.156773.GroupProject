@@ -1,7 +1,9 @@
 package Controller;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader; // Cần cho việc quay lại MainMenu (nếu muốn load lại scene)
+import javafx.scene.Node;
 import javafx.scene.Parent;    // Cần cho việc quay lại MainMenu
 import javafx.scene.Scene;     // Cần cho việc quay lại MainMenu
 import javafx.scene.control.Button;
@@ -139,46 +141,39 @@ public class GraduationCheckController {
     }
 
     @FXML
-    private void handleBackToMainMenu() {
-        System.out.println("Attempting to go back to main menu / close window...");
-        Stage stage = null;
-        // Ưu tiên lấy stage từ nút được nhấn trực tiếp nếu có fx:id
-        if (backButton != null && backButton.getScene() != null) {
-            stage = (Stage) backButton.getScene().getWindow();
-        }
-        // Nếu không, thử lấy từ một control khác trên scene
-        else if (studentIdField != null && studentIdField.getScene() != null) {
-            stage = (Stage) studentIdField.getScene().getWindow();
-        }
+    private void handleBackToMainMenu(ActionEvent e) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/JavaFX/MainMenu.fxml"));
+            Parent root = loader.load();
 
-        if (stage != null) {
-            // Lựa chọn 1: Đóng cửa sổ hiện tại (nếu đây là cửa sổ phụ)
-            //stage.close();
-
-            // Lựa chọn 2: Load lại MainMenu.fxml trên cùng Stage (giống GradingController)
-            // Nếu bạn muốn hành vi này, hãy bỏ comment phần dưới và comment stage.close()
-            
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/JavaFX/MainMenu.fxml")); // Đường dẫn FXML của Main Menu
-                Parent root = loader.load();
-                MainMenuController mainMenuController = loader.getController();
-                // // Nếu MainMenuController cũng cần initData, bạn có thể gọi ở đây
-                // mainMenuController.initData(...); // Truyền các manager cần thiết
-
-                Scene scene = new Scene(root);
-                stage.setScene(scene);
-                stage.setTitle("Menu Chính"); // Đặt lại tiêu đề
-                stage.show();
-            } catch (IOException e) {
-                e.printStackTrace();
-                resultArea.appendText("Lỗi khi quay lại Menu Chính: " + e.getMessage() + "\n");
+            // Truyền lại managers về MainMenu (initManagers kiểu "merge non-null")
+            MainMenuController main = loader.getController();
+            if (main != null) {
+                main.initManagers(
+                    null,                // ProgramManager
+                    null,                // CourseManager
+                    studentManager,      // StudentManager
+                    gradingSystem,       // GradingSystem
+                    graduationValidator  // GraduationValidator
+                );
             }
-            
-        } else {
-            if (resultArea != null) {
-                resultArea.appendText("Không thể xác định cửa sổ hiện tại để đóng.\n");
-            }
-            System.err.println("Could not get current stage to close.");
+
+            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+
+            // GIỮ kích thước/trạng thái: ưu tiên thay root nếu Scene đã tồn tại
+            if (stage.getScene() == null) stage.setScene(new Scene(root));
+            else stage.getScene().setRoot(root);
+
+            // đảm bảo vẫn full screen / maximize tuỳ bạn bật cái nào ở MainApp
+            if (stage.isFullScreen()) stage.setFullScreen(true);
+            else stage.setMaximized(true);
+
+            stage.setTitle("SSMS - Main Menu");
+            stage.show();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // TODO: show alert nếu muốn
         }
     }
 }

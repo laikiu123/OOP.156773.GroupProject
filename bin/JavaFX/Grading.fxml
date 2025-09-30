@@ -1,64 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.HPos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.GradingController" prefHeight="550.0" prefWidth="600.0">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
-    <children>
-        <Label text="Nhập Điểm Học Phần Sinh viên" style="-fx-font-size: 24px; -fx-font-weight: bold;">
-            <VBox.margin>
-                <Insets bottom="15.0" />
-            </VBox.margin>
-        </Label>
-        <GridPane hgap="10.0" vgap="10.0" maxWidth="500.0">
-            <columnConstraints>
-                <ColumnConstraints hgrow="NEVER" minWidth="120.0" prefWidth="140.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-            </columnConstraints>
-            <children>
-                <Label text="Mã Sinh viên:" GridPane.rowIndex="0" />
-                <TextField fx:id="txtStudentID" promptText="Nhập mã SV rồi Tab/Enter" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                <Label fx:id="lblFoundStudentName" style="-fx-font-style: italic; -fx-text-fill: blue;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <Label fx:id="lblFoundProgramName" style="-fx-font-style: italic; -fx-text-fill: #2E7D32;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Controller.GradingController"
+            prefWidth="900" prefHeight="600">
 
-                <Label text="Mã Học phần:" GridPane.rowIndex="3" />
-                <TextField fx:id="txtCourseID" promptText="Nhập mã HP rồi Tab/Enter" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                <Label fx:id="lblFoundCourseName" style="-fx-font-style: italic; -fx-text-fill: blue;" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+    <!-- (Tuỳ chọn) gắn CSS ngoài -->
+    <!-- <stylesheets>
+        <URL value="@style.css"/>
+    </stylesheets> -->
 
-                <Label text="Điểm Giữa kỳ:" GridPane.rowIndex="5" />
-                <TextField fx:id="txtMidterm" promptText="Ví dụ: 8.5" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+    <center>
+        <VBox alignment="TOP_CENTER" spacing="20">
+            <padding><Insets top="30" bottom="30" left="30" right="30"/></padding>
 
-                <Label text="Điểm Cuối kỳ:" GridPane.rowIndex="6" />
-                <TextField fx:id="txtFinal" promptText="Ví dụ: 7.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-            </children>
-        </GridPane>
-        <Button onAction="#handleSaveGrade" text="Lưu Điểm" prefWidth="120.0" style="-fx-font-size: 14px;">
-            <VBox.margin>
-                <Insets top="15.0" />
-            </VBox.margin>
-        </Button>
-        <Label fx:id="lblStatus" style="-fx-font-style: italic;" minHeight="40.0" wrapText="true" alignment="TOP_LEFT">
-            <VBox.margin>
-                <Insets top="10.0" />
-            </VBox.margin>
-        </Label>
-      <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="ALWAYS">
-         <children>
-              <Button fx:id="btnBackToMainMenu" onAction="#handleBackToMainMenu" text="Quay lại Menu Chính" />
-         </children>
-         <VBox.margin>
-            <Insets top="15.0" />
-         </VBox.margin>
-      </HBox>
-    </children>
-</VBox>
+            <!-- Tiêu đề -->
+            <Label text="Nhập Điểm Học Phần Sinh viên">
+                <font><Font size="24"/></font>
+                <VBox.margin><Insets bottom="5"/></VBox.margin>
+            </Label>
+
+            <!-- Card chứa form -->
+            <VBox maxWidth="680" spacing="18"
+                  style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 24;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 18, 0, 0, 6);">
+
+                <!-- Lưới form -->
+                <GridPane hgap="14" vgap="12">
+                    <columnConstraints>
+                        <!-- Cột nhãn cố định, căn phải -->
+                        <ColumnConstraints prefWidth="160" halignment="RIGHT"/>
+                        <!-- Cột input co giãn -->
+                        <ColumnConstraints hgrow="ALWAYS" />
+                    </columnConstraints>
+
+                    <!-- Hàng 1: Mã SV -->
+                    <Label text="Mã Sinh viên:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtStudentID" promptText="Nhập mã SV rồi Tab/Enter"
+                               GridPane.rowIndex="0" GridPane.columnIndex="1"
+                               maxWidth="Infinity"/>
+
+                    <!-- Hiển thị tên SV & CTĐT -->
+                    <Label fx:id="lblFoundStudentName"
+                           style="-fx-font-style: italic; -fx-text-fill: #1565C0;"
+                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <Label fx:id="lblFoundProgramName"
+                           style="-fx-font-style: italic; -fx-text-fill: #2E7D32;"
+                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <!-- Hàng 4: Mã HP -->
+                    <Label text="Mã Học phần:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtCourseID" promptText="Nhập mã HP rồi Tab/Enter"
+                               GridPane.rowIndex="3" GridPane.columnIndex="1"
+                               maxWidth="Infinity"/>
+                    <Label fx:id="lblFoundCourseName"
+                           style="-fx-font-style: italic; -fx-text-fill: #1565C0;"
+                           GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                    <!-- Hàng 6: Điểm GK -->
+                    <Label text="Điểm Giữa kỳ:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtMidterm" promptText="Ví dụ: 8.5"
+                               GridPane.rowIndex="5" GridPane.columnIndex="1"
+                               maxWidth="Infinity"/>
+
+                    <!-- Hàng 7: Điểm CK -->
+                    <Label text="Điểm Cuối kỳ:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtFinal" promptText="Ví dụ: 7.0"
+                               GridPane.rowIndex="6" GridPane.columnIndex="1"
+                               maxWidth="Infinity"/>
+                </GridPane>
+
+                <!-- Nút hành động -->
+                <HBox alignment="CENTER_RIGHT" spacing="10">
+                 	<Button text="Lưu Điểm"
+                            onAction="#handleSaveGrade"
+                            defaultButton="true"/>
+                    <Button fx:id="btnBackToMainMenu"
+                            onAction="#handleBackToMainMenu"
+                            text="Quay lại Menu Chính"
+                            prefWidth="140"/>
+
+                   
+                </HBox>
+
+                <!-- Trạng thái -->
+                <Label fx:id="lblStatus" wrapText="true"
+                       style="-fx-font-style: italic; -fx-text-fill: #666;"
+                       text="Sẵn sàng nhập điểm."
+                       />
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

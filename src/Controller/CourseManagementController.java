@@ -8,8 +8,10 @@ import SVBK.manager.CourseManager;
 import SVBK.model.Course;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -62,7 +64,7 @@ public class CourseManagementController {
         if (btnFind != null) btnFind.setOnAction(e -> handleFindCourse());
         if (btnEdit != null) btnEdit.setOnAction(e -> handleEditCourse());
         if (btnList != null) btnList.setOnAction(e -> handleOpenCourseListWindow());
-        if (btnBack != null) btnBack.setOnAction(e -> handleBackToMainMenu());
+        if (btnBack != null) btnBack.setOnAction(e -> handleBackToMainMenu(e));
 
 
         if (courseManager != null) {
@@ -338,18 +340,33 @@ public class CourseManagementController {
         }
     }
 
-    private void handleBackToMainMenu() {
+    @FXML
+    private void handleBackToMainMenu(ActionEvent e) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/JavaFX/MainMenu.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) btnBack.getScene().getWindow();
-            System.out.println("CourseManagementController: Quay lại MainMenu. MainMenuController mới sẽ tự khởi tạo managers nếu cần.");
-            stage.setScene(new Scene(root));
-            stage.setTitle("Menu Chính");
+
+            // Truyền lại manager về menu (không ghi đè null nhờ initManagers kiểu merge)
+            MainMenuController main = loader.getController();
+            if (main != null) {
+                main.initManagers(null, courseManager, null, null, null);
+            }
+
+            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+
+            // GIỮ kích thước/trạng thái: ưu tiên thay root nếu Scene đã tồn tại
+            if (stage.getScene() == null) stage.setScene(new Scene(root));
+            else stage.getScene().setRoot(root);
+
+            // đảm bảo vẫn full screen / maximize
+            if (stage.isFullScreen()) stage.setFullScreen(true);
+            else stage.setMaximized(true);
+
+            stage.setTitle("SSMS - Main Menu");
             stage.show();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
-            lblMessage.setText("Lỗi: Không thể quay về menu chính.");
+            // TODO: show alert nếu muốn
         }
     }
 

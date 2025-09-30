@@ -211,20 +211,37 @@ public class ProgramManagementController {
     }
 
     @FXML
-    private void handleBackToMainMenuProgram() { // Đổi tên từ handleBackToMainMenu
+    private void handleBackToMainMenuProgram() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/JavaFX/MainMenu.fxml"));
             Parent root = loader.load();
+
+            // Truyền lại managers của phiên hiện tại
+            MainMenuController main = loader.getController();
+            if (main != null) {
+                main.initManagers(programManager, courseManager, null, null, null);
+            }
+
             Stage stage = (Stage) tablePrograms.getScene().getWindow();
-            System.out.println("ProgramManagementController: Quay lại MainMenu. MainMenuController mới sẽ tự khởi tạo managers.");
-            stage.setScene(new Scene(root));
-            stage.setTitle("Menu Chính");
+
+            if (stage.getScene() == null) {
+                stage.setScene(new Scene(root));
+            } else {
+                stage.getScene().setRoot(root);  // giữ kích thước & trạng thái
+            }
+
+            if (stage.isFullScreen()) stage.setFullScreen(true);
+            else stage.setMaximized(true);
+
+            stage.setTitle("SSMS - Main Menu");
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Lỗi điều hướng", "Lỗi khi quay lại Menu Chính: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Lỗi điều hướng",
+                      "Lỗi khi quay lại Menu Chính: " + e.getMessage());
         }
     }
+
 
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
