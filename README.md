@@ -41,23 +41,10 @@ SVBK/
 ```
 
 ### Class Diagram
-- PlantUML source: [`docs/class-diagram.puml`](docs/class-diagram.puml)  
-- Exported image (put your generated file here): `images/class-diagram.png`  
-![Class Diagram](images/class-diagram.png)
-
-> To export the diagram locally, install PlantUML and run (from the repo root):
-> ```bash
-> java -jar plantuml.jar docs/class-diagram.puml -o images
-> ```
+- Visit Source File: Design/OOP_Manage_Student.asta
 
 ### UI Demo
-- **Program Management Screen**  
-  Put a screenshot at `images/ui-program-management.png`  
-  ![Program Management UI](images/ui-program-management.png)
-
-- **Student Management Screen**  
-  Put a screenshot at `images/ui-student-management.png`  
-  ![Student Management UI](images/ui-student-management.png)
+- We have prepared a demo video showcasing the main user interface and features: https://www.youtube.com/watch?v=vLSVsYWV-Vk
 
 ---
 
@@ -75,15 +62,15 @@ SVBK/
    git clone https://github.com/<your-username>/student-management-system.git
    ```
 2. Open the project in IntelliJ IDEA or Eclipse.  
-3. Build the project and run `StudentManagementSystem.java`.  
+3. Build the project and run `MainApp.java`.  
 4. The management interface will appear, and you can start interacting with the system.  
 
 ---
 
 ## 👨‍💻 Team Members
-- Trọng Lê Minh (Team Leader)  
-- [Member 2]  
-- [Member 3]  
+- Trong Le Minh (Team Leader)  
+- Vinh Nguyen Sy
+- Thanh Truong The
 
 ---
 
