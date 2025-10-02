@@ -41,7 +41,7 @@ SVBK/
 ```
 
 ### Class Diagram
-- Visit Source File: Design/OOP_Manage_Student.asta
+- Visit Source File: Design/SVBK_SSMS_ClassDiagram.png
 
 ### UI Demo
 - We have prepared a demo video showcasing the main user interface and features: https://www.youtube.com/watch?v=vLSVsYWV-Vk
