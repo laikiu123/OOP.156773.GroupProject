@@ -51,7 +51,6 @@ SVBK/
 ## ⚙️ Technologies
 - **Language**: Java 17  
 - **UI**: JavaFX (FXML)  
-- **Build Tool**: Maven/Gradle (optional)  
 - **Recommended IDE**: IntelliJ IDEA / Eclipse  
 
 ---
